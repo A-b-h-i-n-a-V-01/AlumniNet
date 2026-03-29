@@ -1,67 +1,109 @@
 {% extends "base.html" %}
+
 {% block content %}
 <div class="fade-in-up">
-    <div class="content-header">
+    <div class="content-header mb-5">
         <div>
-            <h1><i class="fas fa-trophy me-2" style="background:var(--grad-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>Hall of Fame</h1>
-            <p style="color:var(--t-muted); margin:4px 0 0; font-size:.875rem;">Top contributors in our community</p>
+            <h1 class="display-heading mb-1">Alumni Leaderboard</h1>
+            <p class="text-muted">Celebrating our most active contributors and mentors.</p>
+        </div>
+        <div class="stat-badge">
+            <i class="fas fa-trophy text-warning me-2"></i> Rank: Alumni Elite
         </div>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-9">
-            <div class="dash-card p-0 overflow-hidden">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-5">#</th>
-                            <th>Member</th>
-                            <th>Badges</th>
-                            <th class="text-end pe-5">Points</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr class="align-middle">
-                            <td class="ps-5">
-                                {% if loop.index == 1 %}
-                                <span style="font-size:1.1rem;">🥇</span>
-                                {% elif loop.index == 2 %}
-                                <span style="font-size:1.1rem;">🥈</span>
-                                {% elif loop.index == 3 %}
-                                <span style="font-size:1.1rem;">🥉</span>
-                                {% else %}
-                                <span style="color:var(--t-muted); font-weight:700; font-size:.875rem;">#{{ loop.index }}</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4c1d95&color=c4b5fd&bold=true&size=64"
-                                         class="rounded-circle" width="38" height="38" alt="{{ user.username }}"
-                                         style="border:2px solid rgba(124,58,237,.3);">
-                                    <div>
-                                        <div style="font-weight:600; color:var(--t-hi); font-size:.9rem;">{{ user.username }}</div>
-                                        <small style="color:var(--t-muted);">{{ user.role|capitalize }}</small>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="dash-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted smaller fw-bold">
+                                <th class="ps-0">#</th>
+                                <th>Alumnus</th>
+                                <th>Contributions</th>
+                                <th class="text-end pe-0">XP Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td class="ps-0">
+                                    {% if loop.index == 1 %}
+                                        <span class="fs-5">🥇</span>
+                                    {% elif loop.index == 2 %}
+                                        <span class="fs-5">🥈</span>
+                                    {% elif loop.index == 3 %}
+                                        <span class="fs-5">🥉</span>
+                                    {% else %}
+                                        <span class="text-muted fw-bold">#{{ loop.index }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" class="rounded-circle me-3" width="36" height="36" style="border: 2px solid rgba(167, 139, 250, 0.3);">
+                                        <div>
+                                            <div class="fw-bold text-white">{{ user.username }}</div>
+                                            <div class="text-muted smaller">{{ user.alumni_profile.degree }} &middot; {{ user.alumni_profile.graduation_year }}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                {% for badge in user.badges %}
-                                <i class="{{ badge.icon_class }} text-warning me-1" title="{{ badge.name }}"></i>
-                                {% else %}
-                                <span style="color:var(--t-dim);">—</span>
-                                {% endfor %}
-                            </td>
-                            <td class="text-end pe-5">
-                                <span style="font-family:'Syne',sans-serif; font-weight:800; font-size:1rem; background:var(--grad-text); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
-                                    {{ user.points }}
-                                </span>
-                                <span style="color:var(--t-dim); font-size:.72rem; font-weight:600;"> XP</span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark-soft text-muted smaller">
+                                        {{ user.alumni_profile.jobs_posted|length }} Jobs
+                                    </span>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <div class="d-flex flex-column align-items-end">
+                                        <span class="fw-bold text-warning">{{ user.points }}</span>
+                                        <div class="progress" style="width: 60px; height: 3px !important; margin-top: 4px;">
+                                            <div class="progress-bar bg-warning" style="width: {{ (user.points / (users[0].points if users else 1) * 100)|int }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">No alumni found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="dash-card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent);">
+                <h5 class="mb-4 d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2 text-primary"></i> How to Earn XP
+                </h5>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-3 d-flex align-items-start">
+                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">10</div>
+                        <div class="text-muted">Complete your Alumni profile for the first time.</div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">20</div>
+                        <div class="text-muted">Every job or internship post you share with the community.</div>
+                    </li>
+                    <li class="mb-0 d-flex align-items-start">
+                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">5</div>
+                        <div class="text-muted">Daily login bonus for staying active on the platform.</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="dash-card mt-4">
+                <h6 class="text-muted smaller mb-3 fw-bold">TOP CONTRIBUTORS</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for user in users[:5] %}
+                    <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" 
+                         class="rounded-circle border border-2 border-primary" 
+                         width="32" height="32" 
+                         title="{{ user.username }} ({{ user.points }} XP)">
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

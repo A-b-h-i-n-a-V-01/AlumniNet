@@ -9,9 +9,15 @@
             {# Avatar header #}
             <div class="text-center mb-5">
                 <div style="position:relative; display:inline-block; margin-bottom:16px;">
-                    <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&size=128&background=4c1d95&color=c4b5fd&bold=true"
-                         class="rounded-circle" width="88" height="88" alt="Profile"
-                         style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2);">
+                    {% if current_user.image_file and current_user.image_file != 'default.jpg' %}
+                        <img src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}"
+                             class="rounded-circle mt-3 mb-3" width="88" height="88" alt="Profile"
+                             style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2); object-fit: cover;">
+                    {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&size=128&background=4c1d95&color=c4b5fd&bold=true"
+                             class="rounded-circle mt-3 mb-3" width="88" height="88" alt="Profile"
+                             style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2); object-fit: cover;">
+                    {% endif %}
                 </div>
                 <h4 style="color:var(--t-hi); font-family:'Syne',sans-serif; letter-spacing:-.03em; margin-bottom:8px;">{{ current_user.username }}</h4>
                 <div class="d-flex justify-content-center gap-2 flex-wrap">
@@ -27,8 +33,16 @@
             <div style="height:1px; background:var(--c-border); margin-bottom:28px;"></div>
 
             {% if form %}
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
+
+                <div class="mb-4 text-start">
+                    {{ form.picture.label(class="form-label") }}
+                    {{ form.picture(class="form-control mb-1", style="background:#fff!important; color:#000!important;") }}
+                    {% if form.picture.errors %}
+                        {% for error in form.picture.errors %}<span class="text-danger small">{{ error }}</span><br>{% endfor %}
+                    {% endif %}
+                </div>
 
                 {% if current_user.role == 'alumni' %}
                 <div class="mb-2" style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">Alumni Details</div>
@@ -93,6 +107,13 @@
                     {{ form.cgpa.label(class="form-label") }}
                     {% if form.cgpa.errors %}{{ form.cgpa(class="form-control is-invalid") }}<div class="invalid-feedback">{% for e in form.cgpa.errors %}<span>{{ e }}</span>{% endfor %}</div>
                     {% else %}{{ form.cgpa(class="form-control") }}{% endif %}
+                </div>
+                {% elif current_user.role == 'faculty' %}
+                <div class="mb-2" style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">Faculty Details</div>
+                <div class="mb-4">
+                    {{ form.department.label(class="form-label") }}
+                    {% if form.department.errors %}{{ form.department(class="form-control is-invalid") }}<div class="invalid-feedback">{% for e in form.department.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                    {% else %}{{ form.department(class="form-control") }}{% endif %}
                 </div>
                 {% endif %}
 

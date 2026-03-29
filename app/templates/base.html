@@ -63,6 +63,23 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ url_for('search') }}" class="nav-link {% if request.endpoint == 'search' %}active{% endif %}">
+                            <i class="fas fa-search"></i>
+                            <span class="nav-text">Directory</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('messages') }}" class="nav-link {% if request.endpoint in ['messages', 'chat'] %}active{% endif %} {% if unread_count > 0 %}has-unread{% endif %}">
+                            <i class="fas fa-comments"></i>
+                            <span class="nav-text">Messages</span>
+                            {% if unread_count > 0 %}
+                            <span class="badge rounded-pill bg-danger ms-auto shadow-sm" style="font-size: 0.7rem; background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);">
+                                {{ unread_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ url_for('leaderboard') }}" class="nav-link {% if request.endpoint == 'leaderboard' %}active{% endif %}">
                             <i class="fas fa-trophy"></i>
                             <span class="nav-text">Leaderboard</span>
@@ -79,8 +96,11 @@
                 {# User dropdown #}
                 <div class="sidebar-user dropdown">
                     <a href="#" class="dropdown-toggle" id="userDrop" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&background=4c1d95&color=c4b5fd&bold=true&size=64"
-                             alt="avatar" class="sidebar-avatar">
+                        {% if current_user.image_file and current_user.image_file != 'default.jpg' %}
+                        <img src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}" alt="avatar" class="sidebar-avatar" style="object-fit:cover;">
+                        {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&background=4c1d95&color=c4b5fd&bold=true&size=64" alt="avatar" class="sidebar-avatar">
+                        {% endif %}
                         <span class="nav-text text-truncate" style="max-width:120px;">{{ current_user.username }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDrop">

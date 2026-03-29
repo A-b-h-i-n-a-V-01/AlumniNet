@@ -25,11 +25,18 @@
                         {% else %}{{ form.location(class="form-control", placeholder="City, Country") }}{% endif %}
                     </div>
                 </div>
-                <div class="mb-3">
-                    {{ form.apply_link.label(class="form-label") }}
-                    {% if form.apply_link.errors %}{{ form.apply_link(class="form-control is-invalid") }}<div class="invalid-feedback">{% for e in form.apply_link.errors %}<span>{{ e }}</span>{% endfor %}</div>
-                    {% else %}{{ form.apply_link(class="form-control", placeholder="https://apply.company.com or email@company.com") }}{% endif %}
-                    <div class="form-text">Application URL or email address.</div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        {{ form.target_year.label(class="form-label") }}
+                        {% if form.target_year.errors %}{{ form.target_year(class="form-select is-invalid") }}<div class="invalid-feedback">{% for e in form.target_year.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                        {% else %}{{ form.target_year(class="form-select") }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.apply_link.label(class="form-label") }}
+                        {% if form.apply_link.errors %}{{ form.apply_link(class="form-control is-invalid") }}<div class="invalid-feedback">{% for e in form.apply_link.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                        {% else %}{{ form.apply_link(class="form-control", placeholder="https://apply.company.com") }}{% endif %}
+                        <div class="form-text">Application URL or email.</div>
+                    </div>
                 </div>
                 <div class="mb-4">
                     {{ form.description.label(class="form-label") }}

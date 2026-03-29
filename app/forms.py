@@ -32,11 +32,13 @@ class JobPostForm(FlaskForm):
     title = StringField('Job Title', validators=[DataRequired()])
     company = StringField('Company', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
+    target_year = SelectField('Target Year', choices=[('All', 'All Students'), ('1st Year', '1st Year'), ('2nd Year', '2nd Year'), ('3rd Year', '3rd Year'), ('4th Year', '4th Year')], validators=[DataRequired()])
     apply_link = StringField('Application Link', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Post Job')
 
 class AlumniProfileForm(FlaskForm):
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     graduation_year = IntegerField('Graduation Year', validators=[DataRequired(), NumberRange(min=1950, max=2030)])
     degree = StringField('Degree', validators=[DataRequired()])
     current_company = StringField('Current Company')
@@ -45,7 +47,13 @@ class AlumniProfileForm(FlaskForm):
     submit = SubmitField('Update Profile')
 
 class StudentProfileForm(FlaskForm):
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     enrollment_year = IntegerField('Enrollment Year', validators=[DataRequired()])
     department = StringField('Department', validators=[DataRequired()])
     cgpa = StringField('CGPA')
+    submit = SubmitField('Update Profile')
+
+class FacultyProfileForm(FlaskForm):
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    department = StringField('Department', validators=[DataRequired()])
     submit = SubmitField('Update Profile')
