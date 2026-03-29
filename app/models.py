@@ -25,10 +25,12 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     role = db.Column(db.String(10), nullable=False) # 'admin', 'faculty', 'alumni', 'student'
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
     alumni_profile = db.relationship('AlumniProfile', backref='user', uselist=False, lazy=True)
     student_profile = db.relationship('StudentProfile', backref='user', uselist=False, lazy=True)
+    faculty_profile = db.relationship('FacultyProfile', backref='user', uselist=False, lazy=True)
     certificates = db.relationship('Certificate', backref='owner', lazy=True)
     skills = db.relationship('Skill', secondary=user_skills, lazy='subquery', backref=db.backref('users', lazy=True))
     badges = db.relationship('Badge', secondary=user_badges, lazy='subquery', backref=db.backref('users', lazy=True))
@@ -59,6 +61,12 @@ class StudentProfile(db.Model):
     department = db.Column(db.String(100), nullable=False)
     cgpa = db.Column(db.Float)
 
+class FacultyProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    department = db.Column(db.String(100), default='General')
+    is_approved = db.Column(db.Boolean, default=False)
+
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -68,6 +76,7 @@ class Job(db.Model):
     apply_link = db.Column(db.String(200), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     is_approved = db.Column(db.Boolean, default=False)
+    target_year = db.Column(db.String(20), default='All')
     user_id = db.Column(db.Integer, db.ForeignKey('alumni_profile.id'), nullable=False)
 
 class Certificate(db.Model):
@@ -101,3 +110,26 @@ class RoadmapStep(db.Model):
     description = db.Column(db.Text)
     order = db.Column(db.Integer, nullable=False)
     roadmap_id = db.Column(db.Integer, db.ForeignKey('roadmap.id'), nullable=False)
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='messages_sent')
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='messages_received')
+
+class PointTransaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    action = db.Column(db.String(50), nullable=False) # e.g., 'profile_update', 'job_post', 'daily_login'
+    amount = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref='point_history', lazy=True)
+
+    def __repr__(self):
+        return f"PointTransaction('{self.action}', {self.amount}, '{self.timestamp}')"

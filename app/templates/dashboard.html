@@ -100,8 +100,18 @@
     {# ALUMNI #}
     {% elif current_user.role == 'alumni' %}
     <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="dash-card d-flex justify-content-between align-items-center" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,70,229,.08)); border-color:rgba(124,58,237,.25);">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, rgba(245,158,11,0.1), transparent); border: 1px solid rgba(245,158,11,0.2);">
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="stat-icon" style="color:#FCD34D;"><i class="fas fa-bolt fs-4"></i></div>
+                    <div class="text-warning smaller fw-bold">XP POINTS</div>
+                </div>
+                <h3 class="stat-number mb-0" style="color:#FCD34D;">{{ current_user.points }}</h3>
+                <div class="stat-label">Total Contribution</div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="dash-card d-flex justify-content-between align-items-center h-100" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,70,229,.08)); border-color:rgba(124,58,237,.25);">
                 <div>
                     <div style="font-weight:700; color:var(--t-hi); margin-bottom:4px;">Profile Status</div>
                     <span class="badge {% if profile.is_approved == 'Approved' %}bg-success{% else %}bg-warning{% endif %}">
@@ -168,24 +178,13 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="dash-card mb-4 text-center" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,70,229,.08)); border-color:rgba(124,58,237,.25);">
-                <div class="stat-label mb-2">My Points</div>
-                <div class="stat-number" style="font-size:3.5rem; color:#FCD34D;">{{ current_user.points }}</div>
-                <p style="color:var(--t-muted); font-size:.8rem; margin:8px 0 0;">Rank: Novice</p>
+            <div class="dash-card mb-4 text-center" style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(79,70,229,.05)); border: 1px solid rgba(124,58,237,.15);">
+                <div class="stat-label mb-2">My Profile</div>
+                <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; line-height: 55px;"><i class="fas fa-user-graduate"></i></div>
+                <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm w-100">Update Info</a>
             </div>
-            <div class="dash-card">
-                <h6 style="font-weight:700; color:var(--t-hi); margin-bottom:4px;">Skills Gap</h6>
-                <p style="color:var(--t-muted); font-size:.8rem; margin-bottom:16px;">Compare with alumni paths</p>
-                {% for skill, pct, cls in [('Python',25,'bg-success'),('Communication',50,'bg-info'),('Leadership',10,'bg-warning')] %}
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <small style="font-weight:600; color:var(--t-base);">{{ skill }}</small>
-                        <small style="color:var(--t-muted);">{{ pct }}%</small>
-                    </div>
-                    <div class="progress"><div class="progress-bar {{ cls }}" style="width:{{ pct }}%"></div></div>
-                </div>
-                {% endfor %}
-            </div>
+            <!-- Skills Gap section has been removed to simplify User Experience -->
+
         </div>
     </div>
 

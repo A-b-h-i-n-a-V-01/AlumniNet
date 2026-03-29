@@ -26,7 +26,7 @@
     {# Floating stat cards #}
     <div class="container mt-5" style="max-width:860px;">
         <div class="row g-4 justify-content-center mt-2">
-            {% set stats = [('5000+','Verified Alumni','fa-users'),('200+','Daily Jobs','fa-briefcase'),('50+','Mentors','fa-user-graduate'),('15+','Global Chapters','fa-globe')] %}
+            {% set stats = [(total_alumni, 'Total Alumni', 'fa-users'), (active_alumni, 'Active Alumni', 'fa-bolt'), (daily_jobs, 'Daily Jobs', 'fa-briefcase'), (global_chapters, 'Global Chapters', 'fa-globe')] %}
             {% for num, label, icon in stats %}
             <div class="col-6 col-md-3">
                 <div class="stat-card text-center" style="padding:24px 16px;">
