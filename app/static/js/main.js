@@ -300,8 +300,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const label = document.getElementById('theme-toggle-label');
     if (label) label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
 
-    // Support both the sidebar #theme-toggle and .auth-theme-toggle buttons
-    const btns = document.querySelectorAll('#theme-toggle, .auth-theme-toggle');
+    // Support #theme-toggle, .auth-theme-toggle, and .nav-theme-toggle buttons
+    const btns = document.querySelectorAll('#theme-toggle, .auth-theme-toggle, .nav-theme-toggle');
     btns.forEach(btn => {
       btn.addEventListener('click', () => toggleTheme(btn));
     });
