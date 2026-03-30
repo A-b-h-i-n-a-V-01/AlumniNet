@@ -1625,20 +1625,18 @@ a .dash-card, a .glass-card, a .stat-card, a .feature-card {
 #theme-toggle {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 14px;
-  margin-top: 6px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 12px 0 16px 14px;
   background: none;
   border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
+  border-radius: 50%;
   cursor: pointer;
   color: var(--t-muted);
-  font-size: .875rem;
-  font-weight: 500;
-  font-family: 'Inter', system-ui, sans-serif;
-  transition: background var(--dur), color var(--dur), border-color var(--dur);
-  white-space: nowrap;
+  transition: all var(--dur) var(--ease);
+  position: relative;
+  overflow: hidden;
 }
 #theme-toggle:hover { background: var(--c-surface-2); color: var(--t-hi); border-color: var(--c-border-hi); }
 

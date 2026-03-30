@@ -75,6 +75,9 @@
 
   // ── Form submit: show bar ────────────────────────────────
   document.addEventListener('submit', function (e) {
+    // If another script (like AJAX chat) already prevented default, don't show loader
+    if (e.defaultPrevented) return;
+
     const form = e.target;
     if (form.method && form.method.toLowerCase() !== 'dialog') {
       startBar();
@@ -248,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ::view-transition-new(root) {
       z-index: 9999;
       clip-path: var(--theme-ripple-clip, circle(0px at 50% 50%));
-      animation: _theme_ripple 0.7s ease-in-out forwards;
+      animation: _theme_ripple 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       will-change: clip-path;
     }
     ::view-transition-old(root) {
@@ -257,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     @keyframes _theme_ripple {
       from { clip-path: var(--theme-ripple-from, circle(0px at 50% 50%)); }
-      to   { clip-path: var(--theme-ripple-to,   circle(200vmax at 50% 50%)); }
+      to   { clip-path: var(--theme-ripple-to,   circle(100% at 50% 50%)); }
     }
   `;
   document.head.appendChild(vt);
@@ -265,21 +268,25 @@ document.addEventListener('DOMContentLoaded', function () {
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
-    // Update label text if it exists (sidebar toggle)
-    const label = document.getElementById('theme-toggle-label');
-    if (label) label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
   }
 
   function toggleTheme(btn) {
     const current  = document.documentElement.getAttribute('data-theme') || 'dark';
     const next     = current === 'dark' ? 'light' : 'dark';
 
-    // Get the center of the toggle button for the ripple origin
+    // Get exact center of the button for the ripple origin
     const rect = btn.getBoundingClientRect();
     const x    = Math.round(rect.left + rect.width  / 2);
     const y    = Math.round(rect.top  + rect.height / 2);
+    
+    // Calculate distance to the furthest corner of the screen
+    const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+    );
+
     const from = `circle(0px at ${x}px ${y}px)`;
-    const to   = `circle(200vmax at ${x}px ${y}px)`;
+    const to   = `circle(${Math.ceil(endRadius)}px at ${x}px ${y}px)`;
 
     // Set CSS vars used by the @keyframes above
     document.documentElement.style.setProperty('--theme-ripple-from', from);
@@ -289,7 +296,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.startViewTransition) {
       document.startViewTransition(() => { applyTheme(next); });
     } else {
-      // Fallback: just switch instantly
       applyTheme(next);
     }
   }
@@ -297,8 +303,6 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('DOMContentLoaded', function () {
     // Sync label text after DOM ready
     const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const label = document.getElementById('theme-toggle-label');
-    if (label) label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
 
     // Support #theme-toggle, .auth-theme-toggle, and .nav-theme-toggle buttons
     const btns = document.querySelectorAll('#theme-toggle, .auth-theme-toggle, .nav-theme-toggle');
