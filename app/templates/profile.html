@@ -11,10 +11,12 @@
                 <div style="position:relative; display:inline-block; margin-bottom:16px;">
                     {% if current_user.image_file and current_user.image_file != 'default.jpg' %}
                         <img src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}"
+                             onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
                              class="rounded-circle mt-3 mb-3" width="88" height="88" alt="Profile"
                              style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2); object-fit: cover;">
                     {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ current_user.username }}&size=128&background=4c1d95&color=c4b5fd&bold=true"
+                        <img src="{{ url_for('static', filename='profile_pics/default.jpg') }}"
+                             onerror="this.src='https://ui-avatars.com/api/?name={{ current_user.username }}&size=128&background=4c1d95&color=c4b5fd&bold=true'"
                              class="rounded-circle mt-3 mb-3" width="88" height="88" alt="Profile"
                              style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2); object-fit: cover;">
                     {% endif %}

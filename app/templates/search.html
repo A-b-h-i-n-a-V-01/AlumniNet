@@ -21,9 +21,13 @@
                 <div class="d-flex align-items-center">
                     
                     {% if res.user.image_file and res.user.image_file != 'default.jpg' %}
-                    <img src="{{ url_for('static', filename='profile_pics/' + res.user.image_file) }}" class="rounded-circle me-3" width="50" height="50" style="object-fit:cover;">
+                    <img src="{{ url_for('static', filename='profile_pics/' + res.user.image_file) }}" 
+                         onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                         class="rounded-circle me-3" width="50" height="50" style="object-fit:cover;">
                     {% else %}
-                    <img src="https://ui-avatars.com/api/?name={{ res.user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="50" height="50">
+                    <img src="{{ url_for('static', filename='profile_pics/default.jpg') }}" 
+                         onerror="this.src='https://ui-avatars.com/api/?name={{ res.user.username }}&background=4c1d95&color=c4b5fd'"
+                         class="rounded-circle me-3" width="50" height="50" style="object-fit:cover;">
                     {% endif %}
                     <div>
                         <h6 class="mb-0 text-white">

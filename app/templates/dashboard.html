@@ -132,12 +132,21 @@
     {% elif current_user.role == 'student' %}
     <div class="row g-4">
         <div class="col-md-8">
-            <div class="dash-card h-100">
                 <h5 class="mb-4" style="color:var(--t-hi); font-weight:700;">Recommended Opportunities</h5>
                 {% if jobs %}
                 <div class="d-flex flex-column gap-3">
                     {% for job in jobs %}
-                    <div style="background:rgba(255,255,255,.03); border:1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:border-color .2s;">
+                    <div class="job-card-clickable" 
+                         style="background:rgba(255,255,255,.03); border:1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:all .2s;"
+                         data-title="{{ job.title }}"
+                         data-company="{{ job.company }}"
+                         data-location="{{ job.location }}"
+                         data-type="{{ job.type if job.type else 'Full Time' }}"
+                         data-description="{{ job.description }}"
+                         data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
+                         data-posted-by="{{ job.author.user.username }}"
+                         data-apply-link="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
+                         onclick="viewJobDetails(this)">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h6 style="font-weight:700; color:#a78bfa; margin:0;">{{ job.title }}</h6>
                             <small style="color:var(--t-muted);">{{ job.date_posted.strftime('%d %b') }}</small>
@@ -145,7 +154,7 @@
                         <div style="color:var(--t-muted); font-size:.825rem; margin-bottom:10px;">{{ job.company }} &middot; {{ job.location }}</div>
                         <p style="color:var(--t-muted); font-size:.85rem; margin-bottom:14px;">{{ job.description[:100] }}...</p>
                         <a href="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
-                           target="_blank" class="btn btn-primary-custom btn-sm">Apply Now</a>
+                           target="_blank" class="btn btn-primary-custom btn-sm" onclick="event.stopPropagation();">Apply Now</a>
                     </div>
                     {% endfor %}
                 </div>
@@ -217,6 +226,7 @@
                     </div>
                     <div class="gallery-uploader">
                         <img src="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}" 
+                             onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
                              class="rounded-circle" width="16" height="16" style="object-fit:cover;">
                         <span>@{{ photo.uploader.username }}</span>
                     </div>
@@ -251,7 +261,9 @@
                     
                     <div class="modal-meta">
                         <div class="d-flex align-items-center gap-3">
-                            <img id="modalUploaderImg" src="" class="rounded-circle" width="32" height="32" style="object-fit:cover; border: 1px solid var(--c-border-hi);">
+                            <img id="modalUploaderImg" src="" 
+                                 onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                                 class="rounded-circle" width="32" height="32" style="object-fit:cover; border: 1px solid var(--c-border-hi);">
                             <div>
                                 <div class="meta-label">Shared by</div>
                                 <div id="modalUploader" class="meta-value"></div>

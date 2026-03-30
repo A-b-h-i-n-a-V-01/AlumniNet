@@ -1726,3 +1726,83 @@ a .dash-card, a .glass-card, a .stat-card, a .feature-card {
   pointer-events: none;
   /* The ripple is driven via clip-path in JS */
 }
+
+/* ─── JOB MODAL & INTERACTIONS ───────────────────────────── */
+.job-card-clickable {
+  cursor: pointer;
+  transition: all var(--dur) var(--ease);
+}
+.job-card-clickable:hover {
+  transform: translateY(-5px) scale(1.01);
+  border-color: rgba(124,58,237,0.4) !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(124,58,237,0.1);
+}
+
+.modal-content-custom {
+  background: rgba(15, 18, 30, 0.7) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    0 40px 100px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
+  overflow: hidden;
+}
+
+.modal-backdrop.show {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal {
+  z-index: 99999 !important;
+}
+
+.modal-header-custom {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 24px 32px !important;
+  background: rgba(255,255,255,0.01);
+}
+
+.modal-body-custom {
+  padding: 32px !important;
+  color: var(--t-base);
+}
+
+.job-modal-description {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--t-base);
+  white-space: pre-line;
+}
+
+.job-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--r);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.job-modal-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--t-muted);
+}
+
+.job-modal-meta-item i {
+  color: var(--a1);
+  font-size: 1rem;
+}
+
+.modal-footer-custom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 20px 32px !important;
+  background: rgba(255,255,255,0.01);
+}

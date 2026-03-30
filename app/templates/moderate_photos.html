@@ -21,6 +21,7 @@
                 
                 <div class="d-flex align-items-center mb-4 pt-3 border-top border-secondary">
                     <img src="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}" 
+                         onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
                          class="rounded-circle me-2" width="24" height="24" style="object-fit:cover;">
                     <span style="font-size:.7rem; color:var(--t-muted);">
                         Uploaded by <strong style="color:var(--primary);">{{ photo.uploader.username }}</strong>
