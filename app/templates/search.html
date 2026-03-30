@@ -26,7 +26,12 @@
                     <img src="https://ui-avatars.com/api/?name={{ res.user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="50" height="50">
                     {% endif %}
                     <div>
-                        <h6 class="mb-0 text-white">{{ res.user.username }}</h6>
+                        <h6 class="mb-0 text-white">
+                            {{ res.user.username }}
+                            {% if res.type == 'alumni' and res.profile.is_approved == 'Approved' %}
+                            <i class="fas fa-check-circle verified-badge" title="Verified Alumni"></i>
+                            {% endif %}
+                        </h6>
                         <small class="text-muted text-capitalize">{{ res.type }}</small>
                     </div>
                 </div>
@@ -40,6 +45,9 @@
                 {% elif res.type == 'student' %}
                     <div><i class="fas fa-book me-2 opacity-75"></i>{{ res.profile.department }}</div>
                     <div class="mt-1"><i class="fas fa-calendar me-2 opacity-75"></i>Batch of {{ res.profile.enrollment_year + 4 }}</div>
+                {% elif res.type == 'faculty' %}
+                    <div><i class="fas fa-university me-2 opacity-75"></i>Department of {{ res.profile.department }}</div>
+                    <div class="mt-1"><i class="fas fa-user-shield me-2 opacity-75"></i>Faculty Mentor</div>
                 {% endif %}
             </div>
             <div class="mt-auto d-flex gap-2">

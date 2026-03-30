@@ -19,7 +19,12 @@
                              style="border:3px solid rgba(124,58,237,.4); box-shadow: 0 0 30px rgba(124,58,237,.2); object-fit: cover;">
                     {% endif %}
                 </div>
-                <h4 style="color:var(--t-hi); font-family:'Syne',sans-serif; letter-spacing:-.03em; margin-bottom:8px;">{{ current_user.username }}</h4>
+                <h4 style="color:var(--t-hi); font-family:'Syne',sans-serif; letter-spacing:-.03em; margin-bottom:8px;">
+                    {{ current_user.username }}
+                    {% if current_user.role == 'alumni' and current_user.alumni_profile.is_approved == 'Approved' %}
+                    <i class="fas fa-check-circle verified-badge" title="Verified Alumni"></i>
+                    {% endif %}
+                </h4>
                 <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
                     <span class="badge bg-primary">{{ current_user.role|capitalize }}</span>
                     {% if current_user.role == 'alumni' %}
@@ -76,10 +81,10 @@
                     <div class="col-md-6 mb-3 mb-md-0">
                         {{ form.graduation_year.label(class="form-label") }}
                         {% if form.graduation_year.errors %}
-                        {{ form.graduation_year(type="number", **{'data-number-input': '', 'min': '1980', 'max': 2025|string}) }}
+                        {{ form.graduation_year(type="number", **{'data-number-input': '', 'min': '1980', 'max': 2035|string}) }}
                         <div class="invalid-feedback">{% for e in form.graduation_year.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                        {{ form.graduation_year(type="number", **{'data-number-input': '', 'min': '1980', 'max': 2025|string}) }}
+                        {{ form.graduation_year(type="number", **{'data-number-input': '', 'min': '1980', 'max': 2035|string}) }}
                         {% endif %}
                         <div class="form-text">Use ± or arrow keys</div>
                     </div>
@@ -116,10 +121,10 @@
                     <div class="col-md-6 mb-3 mb-md-0">
                         {{ form.enrollment_year.label(class="form-label") }}
                         {% if form.enrollment_year.errors %}
-                        {{ form.enrollment_year(type="number", **{'data-number-input': '', 'min': '2000', 'max': 2025|string}) }}
+                        {{ form.enrollment_year(type="number", **{'data-number-input': '', 'min': '2000', 'max': 2035|string}) }}
                         <div class="invalid-feedback">{% for e in form.enrollment_year.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                        {{ form.enrollment_year(type="number", **{'data-number-input': '', 'min': '2000', 'max': 2025|string}) }}
+                        {{ form.enrollment_year(type="number", **{'data-number-input': '', 'min': '2000', 'max': 2035|string}) }}
                         {% endif %}
                         <div class="form-text">Use ± or arrow keys</div>
                     </div>

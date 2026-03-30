@@ -39,7 +39,7 @@ class JobPostForm(FlaskForm):
 
 class AlumniProfileForm(FlaskForm):
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
-    graduation_year = IntegerField('Graduation Year', validators=[DataRequired(), NumberRange(min=1950, max=2030)])
+    graduation_year = IntegerField('Graduation Year', validators=[DataRequired(), NumberRange(min=1950, max=2035)])
     degree = StringField('Degree', validators=[DataRequired()])
     current_company = StringField('Current Company')
     current_position = StringField('Current Position')
@@ -49,7 +49,7 @@ class AlumniProfileForm(FlaskForm):
 
 class StudentProfileForm(FlaskForm):
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
-    enrollment_year = IntegerField('Enrollment Year', validators=[DataRequired()])
+    enrollment_year = IntegerField('Enrollment Year', validators=[DataRequired(), NumberRange(min=1980, max=2035)])
     department = StringField('Department', validators=[DataRequired()])
     cgpa = StringField('CGPA')
     submit = SubmitField('Update Profile')

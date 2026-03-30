@@ -528,7 +528,15 @@ def profile():
 @login_required
 def view_profile(user_id):
     user = User.query.get_or_404(user_id)
-    return render_template('view_profile.html', title=f"{user.username}'s Profile", user=user)
+    jobs = []
+    if user.role == 'alumni' and user.alumni_profile:
+        # Show all jobs if the user is looking at their own profile via this route,
+        # otherwise only show approved jobs.
+        if current_user.id == user.id:
+            jobs = Job.query.filter_by(user_id=user.alumni_profile.id).order_by(Job.date_posted.desc()).all()
+        else:
+            jobs = Job.query.filter_by(user_id=user.alumni_profile.id, is_approved=True).order_by(Job.date_posted.desc()).all()
+    return render_template('view_profile.html', title=f"{user.username}'s Profile", user=user, jobs=jobs)
 
 def leaderboard():
     # Only show Alumni in the leaderboard
@@ -538,39 +546,46 @@ def leaderboard():
 @login_required
 def search():
     query = request.args.get('q', '').strip()
-    results = []
     
-    if current_user.role == 'student':
-        alumni = AlumniProfile.query.filter(AlumniProfile.is_approved == 'Approved').all()
-        results = [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni]
-    elif current_user.role == 'alumni':
-        students = StudentProfile.query.all()
-        alumni = AlumniProfile.query.filter(AlumniProfile.is_approved == 'Approved', AlumniProfile.user_id != current_user.id).all()
-        results = [{'type': 'student', 'profile': s, 'user': s.user} for s in students] + \
-                  [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni]
-    elif current_user.role in ['faculty', 'admin']:
-        alumni = AlumniProfile.query.filter(AlumniProfile.is_approved == 'Approved').all()
-        students = StudentProfile.query.all()
-        results = [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni] + \
-                  [{'type': 'student', 'profile': s, 'user': s.user} for s in students]
+    # ── 1. Fetch All Profiles without Filters ──
+    alumni = AlumniProfile.query.all()
+    students = StudentProfile.query.all()
+    faculty = FacultyProfile.query.all()
 
+    # Aggregate results for all roles
+    results = [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni] + \
+              [{'type': 'student', 'profile': s, 'user': s.user} for s in students] + \
+              [{'type': 'faculty', 'profile': f, 'user': f.user} for f in faculty]
+
+    # ── 2. Keyword Filtering ──
     if query:
         query_lower = query.lower()
-        filtered_results = []
+        filtered = []
         for r in results:
-            u = r['user']
-            p = r['profile']
+            u, p = r['user'], r['profile']
             match = False
-            if query_lower in u.username.lower(): match = True
-            elif r['type'] == 'alumni':
-                if p.degree and query_lower in p.degree.lower(): match = True
-                if p.current_company and query_lower in p.current_company.lower(): match = True
-                if p.current_position and query_lower in p.current_position.lower(): match = True
-            elif r['type'] == 'student':
-                if p.department and query_lower in p.department.lower(): match = True
+            
+            # Name/Email match
+            if query_lower in u.username.lower() or query_lower in u.email.lower(): 
+                match = True
+            
+            # Role-specific fields
+            if not match:
+                if r['type'] == 'alumni':
+                    if (p.degree and query_lower in p.degree.lower()) or \
+                       (p.current_company and query_lower in p.current_company.lower()) or \
+                       (p.current_position and query_lower in p.current_position.lower()):
+                        match = True
+                elif r['type'] == 'student':
+                    if p.department and query_lower in p.department.lower(): 
+                        match = True
+                elif r['type'] == 'faculty':
+                    if p.department and query_lower in p.department.lower():
+                        match = True
+            
             if match:
-                filtered_results.append(r)
-        results = filtered_results
+                filtered.append(r)
+        results = filtered
 
     return render_template('search.html', title='Search', results=results, query=query)
 

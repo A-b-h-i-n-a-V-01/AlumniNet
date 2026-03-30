@@ -35,8 +35,8 @@
 
                 <div>
                     <a href="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
-                       target="_blank" class="btn btn-primary-custom w-100 btn-sm" style="justify-content:center;">
-                       Apply Now <i class="fas fa-external-link-alt ms-1" style="font-size:.7rem;"></i>
+                       target="_blank" class="btn btn-primary-custom w-100 btn-sm">
+                       Apply Now <i class="fas fa-external-link-alt" style="font-size:.7rem;"></i>
                     </a>
                     <div class="text-center mt-2">
                         <small style="color:var(--t-dim); font-size:.72rem;">Posted by {{ job.author.user.username }}</small>
