@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center align-items-center fade-in-up" style="min-height: 80vh;">
+    <div class="col-lg-6 text-center">
+        <div class="dash-card p-5" style="background: rgba(14, 17, 32, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);">
+            <div class="error-icon mb-4">
+                <i class="fas fa-shield-alt" style="font-size: 5rem; color: #ef4444; filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));"></i>
+            </div>
+            <h1 class="display-1 fw-900 gradient-text mb-2" style="font-size: 6rem; letter-spacing: -0.05em;">403</h1>
+            <h2 class="h3 fw-700 mb-4" style="color: var(--t-hi);">Access Forbidden</h2>
+            <p class="mb-5 mx-auto" style="color: var(--t-muted); max-width: 400px; line-height: 1.6;">
+                You don't have the permission to access this resource. It is restricted to authorized roles.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary px-4 py-2 rounded-pill fw-700">
+                    <i class="fas fa-home me-2"></i> Go to Dashboard
+                </a>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-700">
+                    <i class="fas fa-arrow-left me-2"></i> Go Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-900 { font-weight: 900; }
+    .fw-700 { font-weight: 700; }
+    .gradient-text {
+        background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+{% endblock %}

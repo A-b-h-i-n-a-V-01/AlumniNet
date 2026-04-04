@@ -1,130 +1,246 @@
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .message-item:hover {
-        background: rgba(255, 255, 255, 0.03) !important;
-        transform: translateX(4px);
-    }
-    .profile-name-hover {
-        transition: color 0.2s ease;
-    }
-    .profile-name-hover:hover {
-        color: var(--a1) !important;
-        text-decoration: underline !important;
-    }
-    .profile-link {
-        transition: transform 0.2s ease, border-color 0.2s ease;
-        display: inline-block;
-    }
-    .profile-link:hover {
-        transform: scale(1.05);
-        border-color: var(--a1) !important;
-    }
-    .chat-trigger:hover .chat-indicator i {
-        color: var(--a1) !important;
-        opacity: 1 !important;
-    }
-    .dot-divider {
-        width: 4px;
-        height: 4px;
-        background: var(--c-border-hi);
-        border-radius: 50%;
-        display: inline-block;
-    }
-    .text-primary-light {
-        color: #a78bfa;
-        opacity: 0.8;
-    }
-    .unread-highlight {
-        background: rgba(124, 58, 237, 0.05) !important;
-    }
-    .border-a1 {
-        border: 2px solid var(--a1) !important;
-    }
-    .font-smaller {
-        font-size: 0.65rem;
-        border-color: rgba(255,255,255,0.1) !important;
-    }
-    .small-text {
-        font-size: 0.75rem;
-    }
-    .preview-text {
-        font-size: 0.85rem;
-        max-width: 400px;
-    }
-    .text-unread {
-        color: var(--t-hi) !important;
-        font-weight: 500;
-    }
-</style>
-<div class="row fade-in-up">
-    <div class="col-12 col-lg-8 mx-auto">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0 text-white"><i class="fas fa-comments me-2"></i>Recent Messages</h4>
+<div class="fade-in-up">
+    {# Header Section #}
+    <div class="content-header mb-5 d-flex justify-content-between align-items-end">
+        <div>
+            <h1 class="display-heading mb-1 gradient-text" style="font-size: 2.5rem;">Messages</h1>
+            <p style="color:var(--t-muted); font-size:1rem; max-width: 600px;">Connect and collaborate with mentors,
+                peers, and alumni across the SNGCE network.</p>
         </div>
+        <div class="pb-2">
+            <a href="{{ url_for('search') }}" class="btn btn-primary-custom btn-sm px-4"
+                style="font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;">
+                <i class="fas fa-plus me-2"></i> NEW CHAT
+            </a>
+        </div>
+    </div>
 
-        <div class="dash-card bg-surface border-0 overflow-hidden mb-4" style="border: 1px solid var(--c-border) !important; border-radius: 12px;">
-            <div class="list-group list-group-flush">
-                {% for item in contacts_data %}
-                {% set contact = item.contact %}
-                {% set last_msg = item.last_msg %}
-                <div class="list-group-item bg-transparent border-bottom p-4 message-item {% if item.unread_count > 0 %}unread-highlight{% endif %}" style="border-color: var(--c-border) !important; transition: all 0.3s ease; position: relative;">
-                    {% if item.unread_count > 0 %}
-                    <div style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: var(--a1); border-radius: 50%; box-shadow: 0 0 10px var(--a1);"></div>
-                    {% endif %}
-                    
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center flex-grow-1 chat-trigger" style="cursor: pointer;" onclick="window.location.href='{{ url_for('chat', user_id=contact.id) }}';">
-                            <a href="{{ url_for('view_profile', user_id=contact.id) }}" class="profile-link me-3" onclick="event.stopPropagation();" title="View Profile">
-                                {% if contact.image_file and contact.image_file != 'default.jpg' %}
-                                <img src="{{ url_for('static', filename='profile_pics/' + contact.image_file) }}" 
-                                     onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                                     class="rounded-circle {% if item.unread_count > 0 %}border-a1{% endif %}" width="56" height="56" style="object-fit:cover;">
-                                {% else %}
-                                <img src="{{ url_for('static', filename='profile_pics/default.jpg') }}" 
-                                     onerror="this.src='https://ui-avatars.com/api/?name={{ contact.username }}&background=4c1d95&color=c4b5fd'"
-                                     class="rounded-circle {% if item.unread_count > 0 %}border-a1{% endif %}" width="56" height="56" style="object-fit:cover;">
-                                {% endif %}
-                            </a>
-                            <div class="flex-grow-1">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <div class="glass-card p-0 overflow-hidden" style="border-radius: var(--r-lg);">
+                <div class="inbox-container">
+                    {% for item in contacts_data %}
+                    {% set contact = item.contact %}
+                    {% set last_msg = item.last_msg %}
+                    <div class="msg-row {% if item.unread_count > 0 %}unread-active{% endif %}"
+                        onclick="window.location.href='{{ url_for('chat', user_id=contact.id) }}';">
+
+                        <div class="d-flex align-items-center gap-4 w-100">
+                            {# Avatar with Pulse for Unread #}
+                            <div class="avatar-wrapper">
+                                <a href="{{ url_for('view_profile', user_id=contact.id) }}"
+                                    onclick="event.stopPropagation();" class="d-block position-relative">
+                                    <img src="{{ url_for('static', filename='profile_pics/' + contact.image_file) }}"
+                                        onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                                        class="contact-avatar shadow-sm" alt="{{ contact.username }}">
+                                    {% if item.unread_count > 0 %}
+                                    <span class="unread-pulse"></span>
+                                    {% endif %}
+                                </a>
+                            </div>
+
+                            {# Message Preview Content #}
+                            <div class="flex-grow-1 min-w-0">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <h6 class="mb-0 text-white profile-name-hover" style="font-weight: 600;">{{ contact.username }}</h6>
-                                    {% if last_msg %}
-                                    <small class="text-muted" style="font-size: 0.7rem;">{{ last_msg.timestamp.strftime('%d %b, %H:%M') }}</small>
-                                    {% endif %}
+                                    <h6 class="contact-name m-0">{{ contact.username }}</h6>
+                                    <span class="msg-time">
+                                        {% if last_msg %}
+                                        {{ last_msg.timestamp.strftime('%H:%M') if last_msg.timestamp.date() ==
+                                        last_msg.timestamp.now().date() else last_msg.timestamp.strftime('%d %b') }}
+                                        {% endif %}
+                                    </span>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge bg-dark-soft text-muted border border-secondary font-smaller">{{ contact.role | capitalize }}</span>
+
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="role-tag">{{ contact.role|upper }}</span>
                                     {% if contact.role == 'alumni' and contact.alumni_profile.current_company %}
-                                    <small class="text-muted small-text">&middot; {{ contact.alumni_profile.current_company }}</small>
+                                    <span class="sub-tag">&middot; {{ contact.alumni_profile.current_company }}</span>
                                     {% elif contact.role == 'student' and contact.student_profile.department %}
-                                    <small class="text-muted small-text">&middot; {{ contact.student_profile.department }}</small>
+                                    <span class="sub-tag">&middot; {{ contact.student_profile.department }}</span>
                                     {% endif %}
                                 </div>
+
                                 {% if last_msg %}
-                                <p class="mb-0 text-muted text-truncate preview-text {% if item.unread_count > 0 %}text-unread{% endif %}">
-                                    {% if last_msg.sender_id == current_user.id %}You: {% endif %}{{ last_msg.content }}
+                                <p class="msg-preview m-0 text-truncate">
+                                    {% if last_msg.sender_id == current_user.id %}
+                                    <span class="msg-direction"><i class="fas fa-reply me-1"></i> You:</span>
+                                    {% endif %}
+                                    {{ last_msg.content }}
                                 </p>
                                 {% endif %}
                             </div>
-                        </div>
-                        <div class="ms-3">
-                            {% if item.unread_count > 0 %}
-                            <span class="badge rounded-pill bg-primary" style="font-size: 0.7rem;">{{ item.unread_count }} new</span>
-                            {% endif %}
+
+                            {# Action/Count Area #}
+                            <div class="ms-auto ps-3 d-flex flex-column align-items-end">
+                                {% if item.unread_count > 0 %}
+                                <div class="unread-badge">{{ item.unread_count }}</div>
+                                {% endif %}
+                                <i class="fas fa-chevron-right text-muted smaller opacity-25 mt-2 transition-push"></i>
+                            </div>
                         </div>
                     </div>
+                    {% else %}
+                    {# Empty State #}
+                    <div class="p-5 text-center">
+                        <div class="empty-inbox-icon mb-4">
+                            <i class="fas fa-comments text-primary opacity-25" style="font-size: 4rem;"></i>
+                        </div>
+                        <h4 style="color: var(--t-hi); font-family: 'Syne', sans-serif;">Inbox is quiet</h4>
+                        <p class="text-muted mb-4 mx-auto" style="max-width: 300px;">Your network is waiting! Reach out
+                            to alumni or students to start your first conversation.</p>
+                        <a href="{{ url_for('search') }}" class="btn btn-primary-custom btn-sm px-4">DISCOVER PEOPLE</a>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="p-5 text-center text-muted">
-                    <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                    <p class="mb-4">No conversations yet.</p>
-                    <a href="{{ url_for('search') }}" class="btn btn-primary-custom btn-sm px-4">Find someone in Directory</a>
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .inbox-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .msg-row {
+        padding: 1.5rem 2rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        background: transparent;
+    }
+
+    .msg-row:last-child {
+        border-bottom: none;
+    }
+
+    .msg-row:hover {
+        background: rgba(255, 255, 255, 0.03);
+        padding-left: 2.2rem;
+    }
+
+    .msg-row:hover .transition-push {
+        transform: translateX(4px);
+        opacity: 0.6 !important;
+    }
+
+    /* Unread States */
+    .unread-active {
+        background: rgba(124, 58, 237, 0.03);
+    }
+
+    .unread-active .contact-name {
+        color: var(--t-hi) !important;
+        font-weight: 800 !important;
+    }
+
+    .unread-active .msg-preview {
+        color: var(--t-base) !important;
+        font-weight: 500;
+    }
+
+    /* Avatars */
+    .avatar-wrapper {
+        position: relative;
+    }
+
+    .contact-avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .contact-avatar:hover {
+        transform: scale(1.05);
+    }
+
+    .unread-pulse {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 12px;
+        height: 12px;
+        background: var(--a1);
+        border-radius: 50%;
+        border: 2px solid var(--c-surface);
+        box-shadow: 0 0 10px var(--a1);
+        animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+        }
+    }
+
+    /* Typography & Tags */
+    .contact-name {
+        color: var(--t-hi);
+        font-size: 1.05rem;
+        font-weight: 700;
+        transition: color 0.2s ease;
+    }
+
+    .msg-time {
+        color: var(--t-muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .msg-preview {
+        color: var(--t-muted);
+        font-size: 0.85rem;
+        letter-spacing: 0.01em;
+    }
+
+    .msg-direction {
+        color: var(--a1);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-right: 4px;
+    }
+
+    .role-tag {
+        font-size: 0.65rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        color: #a78bfa;
+    }
+
+    .sub-tag {
+        color: var(--t-muted);
+        font-size: 0.75rem;
+    }
+
+    /* Badges */
+    .unread-badge {
+        background: var(--a1);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        min-width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+</style>
 {% endblock %}

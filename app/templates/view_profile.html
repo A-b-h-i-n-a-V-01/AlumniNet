@@ -83,6 +83,10 @@
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Position</p>
                             <h5 class="text-white">{{ user.alumni_profile.current_position or 'N/A' }}</h5>
                         </div>
+                        <div class="col-sm-6">
+                            <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Department</p>
+                            <h5 class="text-white">{{ user.alumni_profile.department or 'N/A' }}</h5>
+                        </div>
                     </div>
                 {% elif user.role == 'student' %}
                     <div class="row g-4">
