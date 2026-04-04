@@ -22,17 +22,16 @@
                  data-title="{{ job.title }}"
                  data-company="{{ job.company }}"
                  data-location="{{ job.location }}"
-                 data-type="{{ job.type if job.type else 'Full Time' }}"
+                   data-type="{{ job.job_type if job.job_type else 'Full Time' }}"
                  data-description="{{ job.description }}"
                  data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
                  data-posted-by="{{ job.author.user.username }}"
-                 data-apply-link="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
+                 data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                  onclick="viewJobDetails(this)">
                 
                 {# Top tag #}
                 <div class="d-flex justify-content-between align-items-start mb-3">
-                    <span class="badge bg-primary">{{ job.type if job.type else 'Full Time' }}</span>
-                    <small style="color:var(--t-muted); font-size:.75rem;">{{ job.date_posted.strftime('%d %b %Y') }}</small>
+                      <span class="badge bg-primary">{{ job.job_type if job.job_type else 'Full-time' }}</span>
                 </div>
 
                 {# Title & company #}
@@ -49,7 +48,7 @@
                 </p>
 
                 <div>
-                    <a href="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
+                    <a href="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                        target="_blank" class="btn btn-primary-custom w-100 btn-sm" onclick="event.stopPropagation();">
                        Apply Now <i class="fas fa-external-link-alt" style="font-size:.7rem;"></i>
                     </a>

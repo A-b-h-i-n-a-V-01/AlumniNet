@@ -313,8 +313,9 @@ def admin_delete_job(job_id):
 # Main App Routes
 @login_required
 def dashboard():
-    # Common data for all roles
-    approved_photos = EventPhoto.query.filter_by(status='approved').order_by(EventPhoto.uploaded_at.desc()).limit(6).all()
+    # Show both events and job posters in the community gallery
+    event_photos = EventPhoto.query.filter_by(status='approved', category='event').order_by(EventPhoto.uploaded_at.desc()).limit(6).all()
+    job_posters = EventPhoto.query.filter_by(status='approved', category='job_poster').order_by(EventPhoto.uploaded_at.desc()).limit(6).all()
     
     if current_user.role == 'admin':
         users_count = User.query.count()
@@ -324,54 +325,58 @@ def dashboard():
                                users_count=users_count, 
                                jobs_count=jobs_count, 
                                pending_alumni=pending_alumni, 
-                               event_photos=approved_photos)
+                               event_photos=event_photos,
+                               job_posters=job_posters)
     
     elif current_user.role == 'faculty':
         if not current_user.faculty_profile or not current_user.faculty_profile.is_approved:
             reason = 'pending admin approval' if current_user.faculty_profile else 'missing profile (please contact admin)'
             flash(f'Your faculty account is {reason}.', 'warning')
-            return render_template('dashboard.html', pending_jobs=[], pending_alumni=[], event_photos=approved_photos)
+            return render_template('dashboard.html', event_photos=event_photos)
         
-        pending_jobs = Job.query.filter_by(is_approved=False).all()
-        pending_alumni = AlumniProfile.query.filter_by(is_approved='Pending').all()
         return render_template('dashboard.html', 
-                               pending_jobs=pending_jobs, 
-                               pending_alumni=pending_alumni, 
-                               event_photos=approved_photos)
+                               event_photos=event_photos,
+                               job_posters=job_posters)
     
     elif current_user.role == 'alumni':
         if not current_user.alumni_profile:
             flash('Your alumni profile is missing. Please contact an admin or complete your registration.', 'danger')
-            return render_template('dashboard.html', jobs=[], profile=None, event_photos=approved_photos)
+            return render_template('dashboard.html', jobs=[], profile=None, event_photos=event_photos, job_posters=job_posters)
         
         my_jobs = Job.query.filter_by(user_id=current_user.alumni_profile.id).all()
         return render_template('dashboard.html', 
                                jobs=my_jobs, 
                                profile=current_user.alumni_profile, 
-                               event_photos=approved_photos)
+                               event_photos=event_photos,
+                               job_posters=job_posters)
     
     elif current_user.role == 'student':
         if not current_user.student_profile:
             flash('Your student profile is missing. Please contact an admin.', 'danger')
-            return render_template('dashboard.html', jobs=[], event_photos=approved_photos)
+            return render_template('dashboard.html', jobs=[], event_photos=event_photos, job_posters=job_posters)
             
         current_year = datetime.utcnow().year
         student_yr_num = current_year - current_user.student_profile.enrollment_year + 1
         year_map = {1: "1st Year", 2: "2nd Year", 3: "3rd Year", 4: "4th Year"}
         student_yr_str = year_map.get(student_yr_num, "4th Year" if student_yr_num > 4 else "1st Year")
         
-        recent_jobs = Job.query.filter(Job.is_approved==True).filter(
+        now = datetime.utcnow()
+        recent_jobs = Job.query.filter(
+            Job.is_approved == True,
+            (Job.application_deadline == None) | (Job.application_deadline >= now)
+        ).filter(
             db.or_(Job.target_year == 'All', Job.target_year == student_yr_str)
         ).order_by(Job.date_posted.desc()).limit(5).all()
         
-        return render_template('dashboard.html', jobs=recent_jobs, event_photos=approved_photos)
+        return render_template('dashboard.html', jobs=recent_jobs, event_photos=event_photos, job_posters=job_posters)
     
-    return render_template('dashboard.html', event_photos=approved_photos)
+    return render_template('dashboard.html', event_photos=event_photos, job_posters=job_posters)
 
 
 
 @login_required
 def jobs():
+    now = datetime.utcnow()
     if current_user.role == 'student':
         current_year = datetime.utcnow().year
         student_yr_num = current_year - current_user.student_profile.enrollment_year + 1
@@ -381,11 +386,17 @@ def jobs():
         elif student_yr_num >= 4: student_yr_str = "4th Year"
         else: student_yr_str = "1st Year"
         
-        jobs = Job.query.filter(Job.is_approved==True).filter(
+        jobs = Job.query.filter(
+            Job.is_approved == True,
+            (Job.application_deadline == None) | (Job.application_deadline >= now)
+        ).filter(
             db.or_(Job.target_year == 'All', Job.target_year == student_yr_str)
         ).all()
     else:
-        jobs = Job.query.filter_by(is_approved=True).all()
+        jobs = Job.query.filter(
+            Job.is_approved == True,
+            (Job.application_deadline == None) | (Job.application_deadline >= now)
+        ).all()
     return render_template('jobs.html', jobs=jobs)
 
 @login_required
@@ -394,10 +405,18 @@ def new_job():
         abort(403)
     form = JobPostForm()
     if form.validate_on_submit():
+        deadline = None
+        if form.application_deadline.data:
+            try:
+                deadline = datetime.strptime(form.application_deadline.data, '%Y-%m-%d')
+            except (ValueError, TypeError):
+                pass
+
         job = Job(title=form.title.data, company=form.company.data, 
-                  location=form.location.data, description=form.description.data,
-                  target_year=form.target_year.data,
-                  apply_link=form.apply_link.data, author=current_user.alumni_profile)
+                  location=form.location.data, job_type=form.job_type.data, 
+                  description=form.description.data, target_year=form.target_year.data,
+                  apply_link=form.apply_link.data, application_deadline=deadline,
+                  author=current_user.alumni_profile)
         db.session.add(job)
         db.session.commit()
         flash('Job posted! Waiting for faculty approval.', 'success')
@@ -418,7 +437,7 @@ def approve_job(job_id):
     flash('Job verified and published! Author awarded 20 points.', 'success')
     if current_user.role == 'admin':
         return redirect(url_for('admin_jobs'))
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('faculty_moderation'))
 
 @login_required
 def approve_alumni(profile_id):
@@ -433,7 +452,7 @@ def approve_alumni(profile_id):
     flash('Alumni profile verified! User awarded 50 points.', 'success')
     if current_user.role == 'admin':
         return redirect(url_for('admin_faculty_approvals'))
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('faculty_moderation'))
 
 @login_required
 def approve_faculty(profile_id):
@@ -444,6 +463,25 @@ def approve_faculty(profile_id):
     db.session.commit()
     flash('Faculty profile approved successfully!', 'success')
     return redirect(url_for('admin_faculty_approvals'))
+
+@login_required
+def faculty_moderation():
+    if current_user.role not in ['faculty', 'admin']:
+        abort(403)
+    
+    # Faculty must be approved to moderate
+    if current_user.role == 'faculty' and (not current_user.faculty_profile or not current_user.faculty_profile.is_approved):
+        flash('Unauthorized: Your faculty profile is pending approval.', 'danger')
+        return redirect(url_for('dashboard'))
+        
+    pending_jobs = Job.query.filter_by(is_approved=False).all()
+    pending_alumni = AlumniProfile.query.filter_by(is_approved='Pending').all()
+    pending_photos = EventPhoto.query.filter_by(status='pending').all()
+    
+    return render_template('faculty_moderation.html', 
+                           pending_jobs=pending_jobs, 
+                           pending_alumni=pending_alumni,
+                           pending_photos=pending_photos)
 
 @login_required
 def reject_faculty(profile_id):
@@ -469,6 +507,14 @@ def profile():
                 current_user.alumni_profile.resume_file = save_resume(form.resume.data)
                 
             current_user.alumni_profile.degree = form.degree.data
+            
+            # Handle 'Other' department manual entry
+            other_dept = request.form.get('other_department_manual')
+            if form.department.data == 'Other' and other_dept:
+                current_user.alumni_profile.department = other_dept
+            else:
+                current_user.alumni_profile.department = form.department.data
+            current_user.alumni_profile.enrollment_year = form.enrollment_year.data
             current_user.alumni_profile.graduation_year = form.graduation_year.data
             current_user.alumni_profile.current_company = form.current_company.data
             current_user.alumni_profile.current_position = form.current_position.data
@@ -481,11 +527,14 @@ def profile():
             flash('Profile Updated!', 'success')
             return redirect(url_for('profile'))
         elif request.method == 'GET':
-            form.degree.data = current_user.alumni_profile.degree
-            form.graduation_year.data = current_user.alumni_profile.graduation_year
-            form.current_company.data = current_user.alumni_profile.current_company
-            form.current_position.data = current_user.alumni_profile.current_position
-            form.linkedin_url.data = current_user.alumni_profile.linkedin_url
+            if current_user.alumni_profile:
+                form.degree.data = current_user.alumni_profile.degree
+                form.department.data = current_user.alumni_profile.department
+                form.enrollment_year.data = current_user.alumni_profile.enrollment_year
+                form.graduation_year.data = current_user.alumni_profile.graduation_year
+                form.current_company.data = current_user.alumni_profile.current_company
+                form.current_position.data = current_user.alumni_profile.current_position
+                form.linkedin_url.data = current_user.alumni_profile.linkedin_url
 
     elif current_user.role == 'student':
         form = StudentProfileForm()
@@ -494,14 +543,17 @@ def profile():
                 current_user.image_file = save_picture(form.picture.data)
             current_user.student_profile.department = form.department.data
             current_user.student_profile.enrollment_year = form.enrollment_year.data
-            current_user.student_profile.cgpa = float(form.cgpa.data) if form.cgpa.data else 0.0
+            current_user.student_profile.expected_graduation_year = form.expected_graduation_year.data
+            current_user.student_profile.cgpa = form.cgpa.data if form.cgpa.data else 0.0
             db.session.commit()
             flash('Profile Updated!', 'success')
             return redirect(url_for('profile'))
         elif request.method == 'GET':
-            form.department.data = current_user.student_profile.department
-            form.enrollment_year.data = current_user.student_profile.enrollment_year
-            form.cgpa.data = current_user.student_profile.cgpa
+            if current_user.student_profile:
+                form.department.data = current_user.student_profile.department
+                form.enrollment_year.data = current_user.student_profile.enrollment_year
+                form.expected_graduation_year.data = current_user.student_profile.expected_graduation_year
+                form.cgpa.data = current_user.student_profile.cgpa
 
     elif current_user.role == 'faculty':
         if not current_user.faculty_profile:
@@ -549,13 +601,9 @@ def search():
     
     # ── 1. Fetch All Profiles without Filters ──
     alumni = AlumniProfile.query.all()
-    students = StudentProfile.query.all()
-    faculty = FacultyProfile.query.all()
 
     # Aggregate results for all roles
-    results = [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni] + \
-              [{'type': 'student', 'profile': s, 'user': s.user} for s in students] + \
-              [{'type': 'faculty', 'profile': f, 'user': f.user} for f in faculty]
+    results = [{'type': 'alumni', 'profile': a, 'user': a.user} for a in alumni]
 
     # ── 2. Keyword Filtering ──
     if query:
@@ -564,30 +612,26 @@ def search():
         for r in results:
             u, p = r['user'], r['profile']
             match = False
-            
+
             # Name/Email match
             if query_lower in u.username.lower() or query_lower in u.email.lower(): 
                 match = True
-            
+
             # Role-specific fields
             if not match:
                 if r['type'] == 'alumni':
                     if (p.degree and query_lower in p.degree.lower()) or \
                        (p.current_company and query_lower in p.current_company.lower()) or \
-                       (p.current_position and query_lower in p.current_position.lower()):
+                       (p.current_position and query_lower in p.current_position.lower()) or \
+                       (p.department and query_lower in p.department.lower()):
                         match = True
-                elif r['type'] == 'student':
-                    if p.department and query_lower in p.department.lower(): 
-                        match = True
-                elif r['type'] == 'faculty':
-                    if p.department and query_lower in p.department.lower():
-                        match = True
-            
+
             if match:
                 filtered.append(r)
+        
         results = filtered
-
-    return render_template('search.html', title='Search', results=results, query=query)
+        
+    return render_template('search.html', title='Directory', results=results, query=query)
 
 @login_required
 def messages():
@@ -667,54 +711,108 @@ def api_send_message(user_id):
 
 @login_required
 def upload_event_photo():
-    if current_user.role != 'alumni':
-        abort(403)
+    # Role check: Only Alumni, Faculty, and Admin can upload to galleries
+    if current_user.role not in ['alumni', 'faculty', 'admin']:
+        flash('You do not have permission to upload to the community gallery.', 'danger')
+        return redirect(url_for('dashboard'))
+
     form = EventPhotoForm()
+    
+    # Pre-select category if passed in URL
+    category_param = request.args.get('category')
+    if category_param in ['event', 'job_poster'] and not form.is_submitted():
+        form.category.data = category_param
+
+    # Set fixed category and hide selection if possible
+    if current_user.role in ['faculty', 'admin']:
+        form.category.choices = [('event', 'Community Event')]
+        form.category.data = 'event'
+    elif current_user.role == 'alumni':
+        form.category.choices = [('job_poster', 'Job Poster/Flyer')]
+        form.category.data = 'job_poster'
+    
+    # Override if specific category passed in URL (for power users/extensibility)
+    if category_param in ['event', 'job_poster'] and not form.is_submitted():
+        form.category.data = category_param
+
     if form.validate_on_submit():
         if form.photo.data:
             photo_file = save_event_photo(form.photo.data)
+            status = 'pending'
+            verified_by = None
+            
+            # Faculty and Admin uploads are auto-approved
+            if current_user.role in ['faculty', 'admin']:
+                status = 'approved'
+                verified_by = current_user.id
+            
+            # Alumni uploads are always pending for verification
+            # (Previously alumni were auto-approved, now they need verification based on user request)
+                
+            category = form.category.data
+            
             event_photo = EventPhoto(
                 user_id=current_user.id,
                 image_path=photo_file,
                 event_name=form.event_name.data,
-                caption=form.caption.data
+                caption=form.caption.data,
+                category=category,
+                status=status,
+                verified_by=verified_by
             )
             db.session.add(event_photo)
             db.session.commit()
-            flash('Photo uploaded successfully! It will be visible once verified by faculty.', 'success')
+            
+            if status == 'approved':
+                flash('Photo uploaded and published to gallery!', 'success')
+            else:
+                flash('Photo submitted for verification. It will appear once approved by faculty.', 'success')
             return redirect(url_for('dashboard'))
-    return render_template('upload_photo.html', title='Upload Event Photo', form=form)
-
-@login_required
-def moderate_photos():
-    if current_user.role not in ['faculty', 'admin']:
-        abort(403)
-    if current_user.role == 'faculty' and (not current_user.faculty_profile or not current_user.faculty_profile.is_approved):
-        abort(403)
-    pending_photos = EventPhoto.query.filter_by(status='pending').all()
-    return render_template('moderate_photos.html', title='Moderate Photos', photos=pending_photos)
+            
+    page_title = 'Upload Job Poster' if form.category.data == 'job_poster' else 'Upload Community Event'
+    return render_template('upload_photo.html', title=page_title, form=form)
 
 @login_required
 def approve_photo(photo_id):
-    if current_user.role not in ['faculty', 'admin']:
-        abort(403)
     photo = EventPhoto.query.get_or_404(photo_id)
+    
+    # Permission check:
+    # 1. Faculty/Admin can approve anything.
+    # 2. Alumni can approve only job posters.
+    can_approve = False
+    if current_user.role in ['faculty', 'admin']:
+        can_approve = True
+    elif current_user.role == 'alumni' and photo.category == 'job_poster':
+        can_approve = True
+        
+    if not can_approve:
+        abort(403)
+        
     photo.status = 'approved'
     photo.verified_by = current_user.id
     db.session.commit()
-    flash('Photo approved and added to gallery!', 'success')
-    return redirect(url_for('moderate_photos'))
+    flash('Approved successfully!', 'success')
+    return redirect(url_for('faculty_moderation'))
 
 @login_required
 def reject_photo(photo_id):
-    if current_user.role not in ['faculty', 'admin']:
-        abort(403)
     photo = EventPhoto.query.get_or_404(photo_id)
+    
+    # Permission check same as approval
+    can_reject = False
+    if current_user.role in ['faculty', 'admin']:
+        can_reject = True
+    elif current_user.role == 'alumni' and photo.category == 'job_poster':
+        can_reject = True
+        
+    if not can_reject:
+        abort(403)
+        
     photo.status = 'rejected'
     photo.verified_by = current_user.id
     db.session.commit()
-    flash('Photo has been rejected.', 'warning')
-    return redirect(url_for('moderate_photos'))
+    flash('Post rejected.', 'warning')
+    return redirect(url_for('faculty_moderation'))
 
 @login_required
 def delete_event_photo(photo_id):

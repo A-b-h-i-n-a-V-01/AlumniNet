@@ -28,15 +28,15 @@ class User(db.Model, UserMixin):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    alumni_profile = db.relationship('AlumniProfile', backref='user', uselist=False, lazy=True)
-    student_profile = db.relationship('StudentProfile', backref='user', uselist=False, lazy=True)
-    faculty_profile = db.relationship('FacultyProfile', backref='user', uselist=False, lazy=True)
-    certificates = db.relationship('Certificate', backref='owner', lazy=True)
+    alumni_profile = db.relationship('AlumniProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
+    student_profile = db.relationship('StudentProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
+    faculty_profile = db.relationship('FacultyProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
+    certificates = db.relationship('Certificate', backref='owner', lazy=True, cascade="all, delete-orphan")
     skills = db.relationship('Skill', secondary=user_skills, lazy='subquery', backref=db.backref('users', lazy=True))
     badges = db.relationship('Badge', secondary=user_badges, lazy='subquery', backref=db.backref('users', lazy=True))
     
     # Points for gamification
-    points = db.Column(db.Integer, default=0)
+    points = db.Column(db.Integer, default=0, server_default='0')
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.role}')"
@@ -44,21 +44,24 @@ class User(db.Model, UserMixin):
 class AlumniProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    enrollment_year = db.Column(db.Integer)
     graduation_year = db.Column(db.Integer, nullable=False)
     degree = db.Column(db.String(100), nullable=False)
+    department = db.Column(db.String(100), default='General')
     current_company = db.Column(db.String(100))
     current_position = db.Column(db.String(100))
     linkedin_url = db.Column(db.String(200))
     resume_file = db.Column(db.String(200))
     is_approved = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     
-    jobs_posted = db.relationship('Job', backref='author', lazy=True)
-    roadmaps = db.relationship('Roadmap', backref='author', lazy=True)
+    jobs_posted = db.relationship('Job', backref='author', lazy=True, cascade="all, delete-orphan")
+    roadmaps = db.relationship('Roadmap', backref='author', lazy=True, cascade="all, delete-orphan")
 
 class StudentProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     enrollment_year = db.Column(db.Integer, nullable=False)
+    expected_graduation_year = db.Column(db.Integer)
     department = db.Column(db.String(100), nullable=False)
     cgpa = db.Column(db.Float)
 
@@ -73,11 +76,13 @@ class Job(db.Model):
     title = db.Column(db.String(100), nullable=False)
     company = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(100), nullable=False)
+    job_type = db.Column(db.String(50), default='Full-time')
     description = db.Column(db.Text, nullable=False)
     apply_link = db.Column(db.String(200), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     is_approved = db.Column(db.Boolean, default=False)
     target_year = db.Column(db.String(20), default='All')
+    application_deadline = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('alumni_profile.id'), nullable=False)
 
 class Certificate(db.Model):
@@ -103,7 +108,7 @@ class Roadmap(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(300))
     alumni_id = db.Column(db.Integer, db.ForeignKey('alumni_profile.id'), nullable=False)
-    steps = db.relationship('RoadmapStep', backref='roadmap', lazy=True)
+    steps = db.relationship('RoadmapStep', backref='roadmap', lazy=True, cascade="all, delete-orphan")
 
 class RoadmapStep(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -120,8 +125,8 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
 
-    sender = db.relationship('User', foreign_keys=[sender_id], backref='messages_sent')
-    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='messages_received')
+    sender = db.relationship('User', foreign_keys=[sender_id], backref=db.backref('messages_sent', cascade="all, delete-orphan"))
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref=db.backref('messages_received', cascade="all, delete-orphan"))
 
 class PointTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -130,7 +135,7 @@ class PointTransaction(db.Model):
     amount = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
-    user = db.relationship('User', backref='point_history', lazy=True)
+    user = db.relationship('User', backref=db.backref('point_history', cascade="all, delete-orphan"), lazy=True)
 
     def __repr__(self):
         return f"PointTransaction('{self.action}', {self.amount}, '{self.timestamp}')"
@@ -141,11 +146,12 @@ class EventPhoto(db.Model):
     image_path = db.Column(db.String(200), nullable=False)
     caption = db.Column(db.String(200))
     event_name = db.Column(db.String(100))
+    category = db.Column(db.String(50), default='event') # 'event' or 'job_poster'
     status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     verified_by = db.Column(db.Integer, db.ForeignKey('user.id'))
     uploaded_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # Relationships
-    uploader = db.relationship('User', foreign_keys=[user_id], backref='uploaded_photos')
+    uploader = db.relationship('User', foreign_keys=[user_id], backref=db.backref('uploaded_photos', cascade="all, delete-orphan"))
     verifier = db.relationship('User', foreign_keys=[verified_by], backref='verified_photos')
 

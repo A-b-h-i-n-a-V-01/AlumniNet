@@ -74,10 +74,21 @@
                 </thead>
                 <tbody>
                     {% for profile in pending_alumni %}
-                    <tr>
+                    <tr class="alumni-row-clickable" 
+                        style="cursor: pointer; transition: background 0.3s ease;"
+                        data-name="{{ profile.user.username }}"
+                        data-email="{{ profile.user.email }}"
+                        data-batch="{{ profile.graduation_year }}"
+                        data-dept="{{ profile.department }}"
+                        data-degree="{{ profile.degree }}"
+                        data-position="{{ profile.current_position or '' }}"
+                        data-company="{{ profile.current_company or '' }}"
+                        data-linkedin="{{ profile.linkedin_url or '' }}"
+                        data-image="{{ url_for('static', filename='profile_pics/' + profile.user.image_file) if profile.user.image_file else 'https://ui-avatars.com/api/?name=' + profile.user.username + '&background=4c1d95&color=c4b5fd' }}"
+                        onclick="viewAlumniDetails(this)">
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="https://ui-avatars.com/api/?name={{ profile.user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="36" height="36">
+                                <img src="{{ url_for('static', filename='profile_pics/' + profile.user.image_file) if profile.user.image_file else 'https://ui-avatars.com/api/?name=' + profile.user.username + '&background=4c1d95&color=c4b5fd' }}" class="rounded-circle me-3" width="36" height="36" style="object-fit:cover;">
                                 <div>
                                     <div class="fw-bold text-white">{{ profile.user.username }}</div>
                                     <div class="text-muted smaller">Batch {{ profile.graduation_year }}</div>
@@ -89,9 +100,11 @@
                             <div class="text-muted smaller">{{ profile.current_company or 'No company listed' }}</div>
                         </td>
                         <td>
-                            <a href="{{ url_for('approve_alumni', profile_id=profile.id) }}" class="btn btn-sm btn-info text-white px-3">
-                                <i class="fas fa-id-card me-1"></i> Verify
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('approve_alumni', profile_id=profile.id) }}" class="btn btn-sm btn-info text-white px-3" onclick="event.stopPropagation();">
+                                    <i class="fas fa-id-card me-1"></i> Verify
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% else %}

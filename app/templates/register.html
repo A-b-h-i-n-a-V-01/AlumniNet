@@ -8,19 +8,25 @@
             <img src="{{ url_for('static', filename='images/sngce_logo.png') }}" alt="sngce_campus">
             <i class="fas fa-graduation-cap"></i> AlumniNet
         </div>
-        
+
         <div class="auth-left-quote">
-            
+
             <blockquote>
                 "Every great<br><span>alumni story</span><br>starts here."
             </blockquote>
             <p>Join the SNGCE community and unlock opportunities that last a lifetime.</p>
-      
+
         </div>
-         
+
         <div class="auth-stats">
-            <div class="auth-stat-box"><div class="num">{{ total_alumni }}</div><div class="lbl">Alumni</div></div>
-            <div class="auth-stat-box"><div class="num">{{ jobs_per_month }}</div><div class="lbl">Jobs/mo</div></div>
+            <div class="auth-stat-box">
+                <div class="num">{{ total_alumni }}</div>
+                <div class="lbl">Alumni</div>
+            </div>
+            <div class="auth-stat-box">
+                <div class="num">{{ jobs_per_month }}</div>
+                <div class="lbl">Jobs/mo</div>
+            </div>
         </div>
     </div>
 
@@ -47,30 +53,33 @@
                 <div class="mb-3">
                     {{ form.username.label(class="form-label") }}
                     {% if form.username.errors %}
-                    {{ form.username(class="form-control is-invalid", placeholder="johndoe") }}
+                    {{ form.username(class="form-control is-invalid", placeholder="Enter you full name") }}
                     <div class="invalid-feedback">{% for e in form.username.errors %}<span>{{ e }}</span>{% endfor %}</div>
                     {% else %}
-                    {{ form.username(class="form-control", placeholder="johndoe") }}
+                    {{ form.username(class="form-control", placeholder="Enter you full name") }}
                     {% endif %}
                 </div>
 
                 <div class="mb-3">
                     {{ form.email.label(class="form-label") }}
                     {% if form.email.errors %}
-                    {{ form.email(class="form-control is-invalid", placeholder="you@example.com") }}
+                    {{ form.email(class="form-control is-invalid", id="reg_email", placeholder="") }}
                     <div class="invalid-feedback">{% for e in form.email.errors %}<span>{{ e }}</span>{% endfor %}</div>
                     {% else %}
-                    {{ form.email(class="form-control", placeholder="you@example.com") }}
+                    {{ form.email(class="form-control", id="reg_email", placeholder="") }}
                     {% endif %}
+                    <div id="email-hint" class="mt-2 d-none" style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">
+                        <i class="fas fa-info-circle me-1"></i>Emails must be of the form: sngxxxxxxx@sngce.ac.in
+                    </div>
                 </div>
 
                 <div class="mb-3">
                     {{ form.role.label(class="form-label") }}
                     {% if form.role.errors %}
-                    {{ form.role(class="form-select is-invalid") }}
+                    {{ form.role(class="form-select is-invalid", id="reg_role") }}
                     <div class="invalid-feedback">{% for e in form.role.errors %}<span>{{ e }}</span>{% endfor %}</div>
                     {% else %}
-                    {{ form.role(class="form-select") }}
+                    {{ form.role(class="form-select", id="reg_role") }}
                     {% endif %}
                 </div>
 
@@ -106,4 +115,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleField = document.getElementById('reg_role');
+        const emailField = document.getElementById('reg_email');
+        const emailHint = document.getElementById('email-hint');
+
+        function updateEmailValidation() {
+            if (roleField.value === 'student') {
+                emailField.setAttribute('pattern', '^[sS][nN][gG][a-zA-Z0-9]+@sngce\\.ac\\.in$');
+                emailField.setAttribute('title', "Student emails must match the institutional format");
+                emailField.placeholder = "";
+                emailHint.classList.remove('d-none');
+            } else {
+                emailField.removeAttribute('pattern');
+                emailField.removeAttribute('title');
+                emailField.placeholder = "";
+                emailHint.classList.add('d-none');
+            }
+        }
+
+        if (roleField) {
+            roleField.addEventListener('change', updateEmailValidation);
+            updateEmailValidation(); // Initialize on load
+        }
+    });
+</script>
 {% endblock %}
