@@ -283,9 +283,8 @@ function viewGallery(el) {
     document.getElementById('modalCaption').innerText = el.getAttribute('data-bs-caption');
     document.getElementById('modalUploader').innerText = '@' + el.getAttribute('data-bs-uploader');
     document.getElementById('modalUploaderImg').src = el.getAttribute('data-bs-uploader-img');
-    
-    var myModal = new bootstrap.Modal(document.getElementById('galleryModal'));
-    myModal.show();
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('galleryModal')).show();
 }
 </script>
 {% endblock %}
