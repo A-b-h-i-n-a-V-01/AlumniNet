@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt
 from datetime import datetime, timedelta
 from app.models import User, Job, AlumniProfile, StudentProfile, Certificate, FacultyProfile, Message, PointTransaction, EventPhoto
-from app.forms import RegistrationForm, LoginForm, JobPostForm, AlumniProfileForm, StudentProfileForm, FacultyProfileForm, EventPhotoForm
+from app.forms import RegistrationForm, LoginForm, JobPostForm, AlumniProfileForm, StudentProfileForm, FacultyProfileForm, EventPhotoForm, JobPosterForm
 
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -647,22 +647,26 @@ def messages():
     contacts_data = []
     for cid in contact_ids:
         contact = User.query.get(cid)
-        # Get the very latest message in this conversation
-        last_msg = Message.query.filter(
+        # Get all valid messages for this conversation to find the latest one that isn't functionally deleted for the current user
+        valid_msgs = Message.query.filter(
             db.or_(
-                db.and_(Message.sender_id == current_user.id, Message.recipient_id == cid),
-                db.and_(Message.sender_id == cid, Message.recipient_id == current_user.id)
+                db.and_(Message.sender_id == current_user.id, Message.recipient_id == cid, Message.deleted_for_sender == False),
+                db.and_(Message.sender_id == cid, Message.recipient_id == current_user.id, Message.deleted_for_recipient == False)
             )
-        ).order_by(Message.timestamp.desc()).first()
+        ).order_by(Message.timestamp.desc()).all()
+        
+        last_msg = valid_msgs[0] if valid_msgs else None
         
         # Get unread count for this specific contact
-        unread_cnt = Message.query.filter_by(sender_id=cid, recipient_id=current_user.id, is_read=False).count()
+        unread_cnt = Message.query.filter_by(sender_id=cid, recipient_id=current_user.id, is_read=False, deleted_for_recipient=False, is_deleted_everyone=False).count()
         
-        contacts_data.append({
-            'contact': contact,
-            'last_msg': last_msg,
-            'unread_count': unread_cnt
-        })
+        # Only add to contacts if there are valid messages
+        if last_msg:
+            contacts_data.append({
+                'contact': contact,
+                'last_msg': last_msg,
+                'unread_count': unread_cnt
+            })
     
     # Sort contacts by last message timestamp (descending)
     contacts_data.sort(key=lambda x: x['last_msg'].timestamp if x['last_msg'] else datetime.min, reverse=True)
@@ -691,13 +695,24 @@ def api_get_chat(user_id):
         )
     ).order_by(Message.timestamp.asc()).all()
     
-    return jsonify([{
-        'id': m.id,
-        'sender_id': m.sender_id,
-        'content': m.content,
-        'timestamp': m.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-        'is_read': m.is_read
-    } for m in msgs])
+    valid_msgs = []
+    for m in msgs:
+        if m.is_deleted_everyone:
+            continue
+        if m.sender_id == current_user.id and m.deleted_for_sender:
+            continue
+        if m.recipient_id == current_user.id and m.deleted_for_recipient:
+            continue
+            
+        valid_msgs.append({
+            'id': m.id,
+            'sender_id': m.sender_id,
+            'content': m.content,
+            'timestamp': m.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'is_read': m.is_read
+        })
+    
+    return jsonify(valid_msgs)
 
 @login_required
 def api_send_message(user_id):
@@ -710,30 +725,69 @@ def api_send_message(user_id):
     return jsonify({'status': 'error', 'message': 'Empty content'}), 400
 
 @login_required
+def api_delete_message(msg_id):
+    msg = Message.query.get_or_404(msg_id)
+    if current_user.id not in [msg.sender_id, msg.recipient_id]:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+    
+    delete_type = request.form.get('type', 'me')
+    
+    if delete_type == 'everyone':
+        if current_user.id == msg.sender_id:
+            msg.is_deleted_everyone = True
+        else:
+            return jsonify({'status': 'error', 'message': 'Only sender can delete for everyone'}), 403
+    elif delete_type == 'me':
+        if current_user.id == msg.sender_id:
+            msg.deleted_for_sender = True
+        if current_user.id == msg.recipient_id:
+            msg.deleted_for_recipient = True
+            
+    db.session.commit()
+    return jsonify({'status': 'success'})
+
+@login_required
+def api_delete_chat(user_id):
+    # Retrieve all messages in the conversation between the two users
+    msgs = Message.query.filter(
+        db.or_(
+            db.and_(Message.sender_id == current_user.id, Message.recipient_id == user_id),
+            db.and_(Message.sender_id == user_id, Message.recipient_id == current_user.id)
+        )
+    ).all()
+    
+    for m in msgs:
+        if m.sender_id == current_user.id:
+            m.deleted_for_sender = True
+        if m.recipient_id == current_user.id:
+            m.deleted_for_recipient = True
+            
+    db.session.commit()
+    return jsonify({'status': 'success'})
+
+@login_required
 def upload_event_photo():
     # Role check: Only Alumni, Faculty, and Admin can upload to galleries
     if current_user.role not in ['alumni', 'faculty', 'admin']:
         flash('You do not have permission to upload to the community gallery.', 'danger')
         return redirect(url_for('dashboard'))
 
-    form = EventPhotoForm()
-    
-    # Pre-select category if passed in URL
     category_param = request.args.get('category')
-    if category_param in ['event', 'job_poster'] and not form.is_submitted():
-        form.category.data = category_param
+    
+    if current_user.role == 'alumni' or category_param == 'job_poster':
+        form = JobPosterForm()
+        category_val = 'job_poster'
+    else:
+        form = EventPhotoForm()
+        category_val = 'event'
 
-    # Set fixed category and hide selection if possible
-    if current_user.role in ['faculty', 'admin']:
+    if isinstance(form, EventPhotoForm):
         form.category.choices = [('event', 'Community Event')]
         form.category.data = 'event'
-    elif current_user.role == 'alumni':
-        form.category.choices = [('job_poster', 'Job Poster/Flyer')]
+        if category_param == 'event' and not form.is_submitted():
+            form.category.data = category_param
+    elif isinstance(form, JobPosterForm) and hasattr(form, 'category'):
         form.category.data = 'job_poster'
-    
-    # Override if specific category passed in URL (for power users/extensibility)
-    if category_param in ['event', 'job_poster'] and not form.is_submitted():
-        form.category.data = category_param
 
     if form.validate_on_submit():
         if form.photo.data:
@@ -749,13 +803,20 @@ def upload_event_photo():
             # Alumni uploads are always pending for verification
             # (Previously alumni were auto-approved, now they need verification based on user request)
                 
-            category = form.category.data
+            if isinstance(form, JobPosterForm):
+                event_name = form.title.data
+                caption = form.description.data
+                category = 'job_poster'
+            else:
+                event_name = form.event_name.data
+                caption = form.caption.data
+                category = form.category.data
             
             event_photo = EventPhoto(
                 user_id=current_user.id,
                 image_path=photo_file,
-                event_name=form.event_name.data,
-                caption=form.caption.data,
+                event_name=event_name,
+                caption=caption,
                 category=category,
                 status=status,
                 verified_by=verified_by
@@ -769,7 +830,7 @@ def upload_event_photo():
                 flash('Photo submitted for verification. It will appear once approved by faculty.', 'success')
             return redirect(url_for('dashboard'))
             
-    page_title = 'Upload Job Poster' if form.category.data == 'job_poster' else 'Upload Community Event'
+    page_title = 'Upload Job Poster' if category_val == 'job_poster' else 'Upload Community Event'
     return render_template('upload_photo.html', title=page_title, form=form)
 
 @login_required

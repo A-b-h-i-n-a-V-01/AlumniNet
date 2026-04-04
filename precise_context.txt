@@ -1,0 +1,90 @@
+﻿
+> <div id="galleryModal" class="modal fade" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+                  <div class="modal-content modal-content-custom">
+                      <div class="modal-body p-0">
+                          <button type="button" class="btn-close 
+btn-close-white position-absolute" style="top: 20px; right: 20px; z-index: 
+1060; background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 50%; 
+opacity: 1;"
+                              data-bs-dismiss="modal" 
+aria-label="Close"></button>
+  
+                          <div class="modal-img-wrap" style="background: 
+rgba(0,0,0,0.2);">
+                              <img id="modalImg" src="" style="width: 100%; 
+max-height: 60vh; object-fit: contain;">
+                          </div>
+  
+                          <div class="modal-details p-4">
+                              <h2 id="modalTitle" class="modal-title-custom 
+mb-3"></h2>
+                              <p id="modalCaption" class="modal-caption-custom 
+mb-4" style="color: var(--t-muted); font-size: 1.05rem; line-height: 1.6;"></p>
+  
+                              <div class="modal-meta pt-4" style="border-top: 
+1px solid rgba(255,255,255,0.08);">
+                                  <div class="d-flex align-items-center gap-3">
+                                      <img id="modalUploaderImg" src=""
+                                          onerror="this.onerror=null; 
+this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                                          class="rounded-circle" width="45" 
+height="45"
+                                          style="object-fit:cover; border: 2px 
+solid var(--a1);">
+                                      <div>
+                                          <div class="meta-label" 
+style="font-size: 0.8rem; color: var(--t-muted); text-transform: uppercase; 
+letter-spacing: 0.05em; margin-bottom: 2px;">Shared by</div>
+                                          <div id="modalUploader" 
+class="meta-value" style="font-weight: 700; color: var(--t-hi); font-size: 
+1.1rem;"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+      </div>
+  </div>
+  
+  <script>
+      function viewGallery(el, e) {
+          if (e) {
+              e.preventDefault();
+              e.stopPropagation();
+          }
+  
+>         const modalEl = document.getElementById('galleryModal');
+          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  
+          document.getElementById('modalImg').src = 
+el.getAttribute('data-bs-path');
+          document.getElementById('modalTitle').innerText = 
+el.getAttribute('data-bs-title');
+          document.getElementById('modalCaption').innerText = 
+el.getAttribute('data-bs-caption');
+          document.getElementById('modalUploader').innerText = '@' + 
+el.getAttribute('data-bs-uploader');
+          document.getElementById('modalUploaderImg').src = 
+el.getAttribute('data-bs-uploader-img');
+  
+          modal.show();
+      }
+  
+      // Defensive cleanup: ensure body state is fully reset whenever the 
+gallery modal is hidden
+>     
+document.getElementById('galleryModal').addEventListener('hidden.bs.modal', 
+function () {
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+          document.querySelectorAll('.modal-backdrop').forEach(function (el) { 
+el.remove(); });
+      });
+  </script>
+  {% endblock %}
+
+

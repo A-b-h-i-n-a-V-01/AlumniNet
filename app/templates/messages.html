@@ -67,7 +67,11 @@
                                     {% if last_msg.sender_id == current_user.id %}
                                     <span class="msg-direction"><i class="fas fa-reply me-1"></i> You:</span>
                                     {% endif %}
+                                    {% if last_msg.is_deleted_everyone %}
+                                    <span class="fst-italic opacity-75">🚫 This message was deleted.</span>
+                                    {% else %}
                                     {{ last_msg.content }}
+                                    {% endif %}
                                 </p>
                                 {% endif %}
                             </div>

@@ -1518,11 +1518,11 @@ a .dash-card, a .glass-card, a .stat-card, a .feature-card {
 
 /* ─── REFINED LIGHTBOX MODAL ────────────────────────────── */
 #galleryModal .modal-content {
-  background: rgba(14,17,32,0.9);
-  backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(14,17,32,0.1) !important;
+  backdrop-filter: blur(40px) saturate(200%) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
   box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-  border-radius: var(--r-lg);
+  border-radius: 24px !important;
   overflow: hidden;
 }
  

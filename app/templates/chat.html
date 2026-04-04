@@ -23,7 +23,19 @@
                 </div>
             </div>
         </div>
-        <div class="ms-auto">
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <div class="dropdown">
+                <button class="btn btn-glass-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-2"></i> OPTIONS
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow border-0 p-2">
+                    <li>
+                        <a class="dropdown-item text-danger d-flex align-items-center py-2 rounded" href="#" onclick="deleteEntireChat(event)">
+                            <i class="fas fa-trash-alt me-2" style="width:20px;text-align:center;"></i> Delete Chat
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <a href="{{ url_for('view_profile', user_id=other_user.id) }}" class="btn btn-glass-sm">
                 <i class="fas fa-user me-2"></i> PROFILE
             </a>
@@ -202,10 +214,11 @@
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     
-    let lastMessageCount = -1;
+    let lastMessageHash = '';
 
     function renderMessages(msgs) {
-        if(msgs.length === lastMessageCount) return;
+        const currentHash = msgs.map(m => m.id + '|' + m.content).join('||');
+        if(currentHash === lastMessageHash) return;
         
         chatMessages.innerHTML = '';
         if(msgs.length === 0) {
@@ -220,7 +233,11 @@
             const isMe = msg.sender_id === currentUserId;
             
             const bubbleWrap = document.createElement('div');
-            bubbleWrap.className = `d-flex flex-column mb-1 ${isMe ? 'align-items-end' : 'align-items-start'}`;
+            bubbleWrap.className = `d-flex mb-1 ${isMe ? 'justify-content-end' : 'justify-content-start'}`;
+            
+            // Container for bubble and dropdown
+            const msgInner = document.createElement('div');
+            msgInner.className = `position-relative d-flex align-items-center ${isMe ? 'flex-row-reverse' : 'flex-row'}`;
             
             const contentDiv = document.createElement('div');
             contentDiv.className = `chat-bubble ${isMe ? 'bubble-sent' : 'bubble-received'}`;
@@ -232,17 +249,107 @@
             timeDiv.innerText = isNaN(date.getTime()) ? msg.timestamp : date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
             contentDiv.appendChild(timeDiv);
-            bubbleWrap.appendChild(contentDiv);
+            msgInner.appendChild(contentDiv);
+            
+            // Add dropdown menu for deleting, if not already deleted for everyone
+            if(!msg.is_deleted_everyone) {
+                const dropWrap = document.createElement('div');
+                dropWrap.className = 'dropdown ms-2 me-2 d-flex align-items-center opacity-75';
+                
+                const dropBtn = document.createElement('button');
+                dropBtn.className = 'btn btn-link btn-sm text-muted p-2';
+                dropBtn.style.boxShadow = 'none';
+                dropBtn.style.textDecoration = 'none';
+                dropBtn.setAttribute('data-bs-toggle', 'dropdown');
+                dropBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+                
+                const dropMenu = document.createElement('ul');
+                dropMenu.className = 'dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-sm border-0';
+                dropMenu.style.minWidth = '180px';
+                
+                // Delete for me
+                const liMe = document.createElement('li');
+                const aMe = document.createElement('a');
+                aMe.className = 'dropdown-item text-danger d-flex align-items-center py-2';
+                aMe.href = '#';
+                aMe.innerHTML = '<i class="far fa-trash-alt me-2" style="width:20px;text-align:center;"></i> Delete for me';
+                aMe.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'me'); };
+                liMe.appendChild(aMe);
+                dropMenu.appendChild(liMe);
+                
+                // Delete for everyone (only for sender)
+                if(isMe) {
+                    const liEve = document.createElement('li');
+                    const aEve = document.createElement('a');
+                    aEve.className = 'dropdown-item text-danger d-flex align-items-center py-2';
+                    aEve.href = '#';
+                    aEve.innerHTML = '<i class="fas fa-undo me-2" style="width:20px;text-align:center;"></i> Unsend';
+                    aEve.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'everyone'); };
+                    liEve.appendChild(aEve);
+                    dropMenu.appendChild(liEve);
+                }
+                
+                dropWrap.appendChild(dropBtn);
+                dropWrap.appendChild(dropMenu);
+                
+                // Prepend dropdown so it appears on the left of bubble for sender, or right for receiver
+                if(isMe) {
+                    msgInner.insertBefore(dropWrap, contentDiv);
+                } else {
+                    msgInner.appendChild(dropWrap);
+                }
+            }
+            
+            bubbleWrap.appendChild(msgInner);
             chatMessages.appendChild(bubbleWrap);
         });
         
-        if(lastMessageCount === -1) {
+        if(lastMessageHash === '') {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
             chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
         }
         
-        lastMessageCount = msgs.length;
+        lastMessageHash = currentHash;
+    }
+
+    function deleteEntireChat(e) {
+        e.preventDefault();
+        if(!confirm('Are you sure you want to delete the entire chat history with {{ other_user.username }}? This action only hides the messages for you and cannot be undone.')) return;
+        
+        fetch(`/api/chat/delete-all/${otherUserId}`, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                window.location.href = "{{ url_for('messages') }}";
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+
+    function deleteMessage(msgId, type) {
+        if(!confirm(`Are you sure you want to ${type === 'everyone' ? 'unsend' : 'delete'} this message?`)) return;
+        
+        const fd = new FormData();
+        fd.append('type', type);
+        
+        fetch(`/api/chat/delete/${msgId}`, {
+            method: 'POST',
+            body: fd
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                fetchMessages();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(err => console.error(err));
     }
 
     function fetchMessages() {

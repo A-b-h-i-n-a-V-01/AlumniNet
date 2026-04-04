@@ -93,23 +93,36 @@
                 <i class="fas fa-images me-2" style="color:var(--info);"></i>Pending Gallery Approvals
             </h5>
             {% if pending_photos %}
-            <div class="row g-4">
+            <div class="list-group list-group-flush">
                 {% for photo in pending_photos %}
-                <div class="col-md-4 col-lg-3">
-                    <div class="gallery-card h-100" style="background: rgba(255,255,255,0.02); border: 1px solid var(--c-border); border-radius: var(--r); overflow: hidden;">
-                        <img src="{{ url_for('static', filename='event_photos/' + photo.filename) }}" 
-                             alt="Gallery Post" class="w-100" style="height: 160px; object-fit: cover;">
-                        <div class="p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="badge rounded-pill bg-info small me-2" style="font-size: 0.65rem; text-transform: uppercase;">{{ photo.category.replace('_', ' ') }}</span>
-                                <small class="text-muted">{{ photo.timestamp.strftime('%d %b') }}</small>
-                            </div>
-                            <p class="small text-muted mb-3 text-truncate">{{ photo.description }}</p>
-                            <div class="d-flex gap-2">
-                                <a href="{{ url_for('approve_photo', photo_id=photo.id) }}" class="btn btn-primary-custom btn-sm flex-grow-1 py-1" style="font-size: 0.8rem;">Approve</a>
-                                <a href="{{ url_for('reject_photo', photo_id=photo.id) }}" class="btn btn-outline-danger btn-sm px-2 py-1" style="font-size: 0.8rem;"><i class="fas fa-times"></i></a>
-                            </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0 px-0 mb-3 photo-row-clickable"
+                    style="cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03) !important; padding-bottom: 15px !important;"
+                    data-id="{{ photo.id }}"
+                    data-path="{{ url_for('static', filename='event_photos/' + photo.image_path) }}"
+                    data-approve-url="{{ url_for('approve_photo', photo_id=photo.id) }}"
+                    data-reject-url="{{ url_for('reject_photo', photo_id=photo.id) }}"
+                    data-title="{{ photo.event_name or 'Unnamed Event' }}"
+                    data-caption="{{ photo.caption or 'No caption provided.' }}"
+                    data-uploader="{{ photo.uploader.username }}"
+                    data-uploader-img="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}"
+                    data-date="{{ photo.uploaded_at.strftime('%d %b %Y') }}"
+                    data-category="{{ photo.category.replace('_', ' ') }}"
+                    onclick="viewPhotoModeration(this, event)">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative me-3" style="width: 50px; height: 50px; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <img src="{{ url_for('static', filename='event_photos/' + photo.image_path) }}"
+                                 class="w-100 h-100" style="object-fit: cover;">
                         </div>
+                        <div>
+                            <div class="fw-semibold" style="color:var(--t-hi);">{{ photo.event_name or 'Untitled Event' }}</div>
+                            <small style="color:var(--t-muted);">{{ photo.uploader.username }} &middot; {{ photo.uploaded_at.strftime('%d %b') }}</small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('approve_photo', photo_id=photo.id) }}" 
+                            class="btn btn-primary-custom btn-sm px-3 rounded-pill" onclick="event.stopPropagation();">Approve</a>
+                        <a href="{{ url_for('reject_photo', photo_id=photo.id) }}" 
+                            class="btn btn-outline-danger btn-sm px-2 rounded-pill" onclick="event.stopPropagation();"><i class="fas fa-times"></i></a>
                     </div>
                 </div>
                 {% endfor %}
@@ -123,4 +136,114 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block modals %}
+<!-- Photo Moderation Modal -->
+<div class="modal fade" id="photoModerationModal" tabindex="-1" aria-hidden="true" style="z-index: 999999;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-content-custom">
+            <div class="modal-body p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute" style="top: 20px; right: 20px; z-index: 1060; background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 50%; opacity: 1;"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+
+                <div class="modal-img-wrap" style="background: rgba(0,0,0,0.2); width:100%; display:flex; justify-content:center; align-items:center; overflow:hidden; max-height: 55vh;">
+                    <img id="modPhotoImg" src="" 
+                         onerror="this.onerror=null; this.src='/static/images/sngce_campus.png';"
+                         style="max-width: 100%; max-height: 55vh; object-fit: contain;">
+                </div>
+
+                <div class="modal-details p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span id="modPhotoCategory" class="badge rounded-pill bg-info small mb-2" style="font-size: 0.65rem; text-transform: uppercase;"></span>
+                            <h2 id="modPhotoTitle" class="modal-title-custom mb-1" style="font-size: 1.8rem; background: var(--grad-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></h2>
+                            <p id="modPhotoDate" class="small text-muted mb-0"></p>
+                        </div>
+                    </div>
+                    
+                    <p id="modPhotoCaption" class="mb-4" style="color: var(--t-muted); font-size: 1.05rem; line-height: 1.6;"></p>
+
+                    <div class="d-flex align-items-center justify-content-between pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
+        <div class="d-flex align-items-center gap-3">
+            <img id="modPhotoUploaderImg" src="" 
+                 onerror="this.onerror=null; this.src='/static/profile_pics/default.jpg';"
+                 class="rounded-circle" width="45" height="45" style="object-fit:cover; border: 2px solid var(--a1);">
+            <div>
+                                <div class="meta-label" style="font-size: 0.8rem; color: var(--t-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Uploaded by</div>
+                                <div id="modPhotoUploader" class="meta-value" style="font-weight: 700; color: var(--t-hi); font-size: 1.1rem;"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <a href="#" id="modApproveBtn" class="btn btn-primary-custom px-4 py-2 rounded-pill" onclick="return forceNavigate(event, this);">Approve Post</a>
+                            <a href="#" id="modRejectBtn" class="btn btn-outline-danger px-4 py-2 rounded-pill" onclick="return forceNavigate(event, this);">Reject</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewPhotoModeration(el, e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const modalEl = document.getElementById('photoModerationModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        const id = el.getAttribute('data-id');
+        const path = el.getAttribute('data-path');
+        const approveUrl = el.getAttribute('data-approve-url');
+        const rejectUrl = el.getAttribute('data-reject-url');
+        const title = el.getAttribute('data-title');
+        const caption = el.getAttribute('data-caption');
+        const uploader = el.getAttribute('data-uploader');
+        const uploaderImg = el.getAttribute('data-uploader-img');
+        const date = el.getAttribute('data-date');
+        const category = el.getAttribute('data-category');
+
+        document.getElementById('modPhotoImg').src = path;
+        document.getElementById('modPhotoTitle').innerText = title;
+        document.getElementById('modPhotoCaption').innerText = caption;
+        document.getElementById('modPhotoUploader').innerText = '@' + uploader;
+        document.getElementById('modPhotoUploaderImg').src = uploaderImg;
+        document.getElementById('modPhotoDate').innerText = 'Uploaded on ' + date;
+        document.getElementById('modPhotoCategory').innerText = category;
+        
+        // Update approval links
+        document.getElementById('modApproveBtn').href = approveUrl || ('/approve_photo/' + id);
+        document.getElementById('modRejectBtn').href = rejectUrl || ('/reject_photo/' + id);
+
+        modal.show();
+    }
+
+    function forceNavigate(e, linkEl) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        const href = linkEl.getAttribute('href');
+        if (!href || href === '#') return false;
+
+        const modalEl = document.getElementById('photoModerationModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        window.location.assign(href);
+        return false;
+    }
+
+    // Defensive cleanup: ensure body state is fully reset whenever the photo moderation modal is hidden
+    document.getElementById('photoModerationModal').addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        document.querySelectorAll('.modal-backdrop').forEach(function (el) { el.remove(); });
+    });
+</script>
+
 {% endblock %}

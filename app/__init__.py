@@ -59,6 +59,8 @@ def create_app(config_class=Config):
     app.add_url_rule('/chat/<int:user_id>', 'chat', routes.chat)
     app.add_url_rule('/api/chat/<int:user_id>', 'api_get_chat', routes.api_get_chat)
     app.add_url_rule('/api/chat/send/<int:user_id>', 'api_send_message', routes.api_send_message, methods=['POST'])
+    app.add_url_rule('/api/chat/delete/<int:msg_id>', 'api_delete_message', routes.api_delete_message, methods=['POST'])
+    app.add_url_rule('/api/chat/delete-all/<int:user_id>', 'api_delete_chat', routes.api_delete_chat, methods=['POST'])
     app.add_url_rule('/upload_photo', 'upload_event_photo', routes.upload_event_photo, methods=['GET', 'POST'])
     app.add_url_rule('/faculty/moderation', 'faculty_moderation', routes.faculty_moderation)
     app.add_url_rule('/approve_photo/<int:photo_id>', 'approve_photo', routes.approve_photo)
@@ -77,7 +79,7 @@ def create_app(config_class=Config):
         from flask_login import current_user
         from app.models import Message
         if current_user.is_authenticated:
-            count = Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
+            count = Message.query.filter_by(recipient_id=current_user.id, is_read=False, deleted_for_recipient=False, is_deleted_everyone=False).count()
             return dict(unread_count=count)
         return dict(unread_count=0)
 

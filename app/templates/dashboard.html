@@ -278,32 +278,34 @@
         </style>
     </div>
 </div>
+{% endblock %}
 
+{% block modals %}
 <!-- Refined Lightbox Modal — placed outside .dash-card to avoid backdrop-filter stacking context issues -->
-<div id="galleryModal" class="modal fade" tabindex="-1" aria-hidden="true">
+<div id="galleryModal" class="modal fade" tabindex="-1" aria-hidden="true" style="z-index: 999999;">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4 z-3"
+        <div class="modal-content modal-content-custom">
+            <div class="modal-body p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute" style="top: 20px; right: 20px; z-index: 1060; background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 50%; opacity: 1;"
                     data-bs-dismiss="modal" aria-label="Close"></button>
 
-                <div class="modal-img-wrap">
-                    <img id="modalImg" src="">
+                <div class="modal-img-wrap" style="background: rgba(0,0,0,0.2);">
+                    <img id="modalImg" src="" style="width: 100%; max-height: 60vh; object-fit: contain;">
                 </div>
 
-                <div class="modal-details">
-                    <h2 id="modalTitle" class="modal-title-custom"></h2>
-                    <p id="modalCaption" class="modal-caption-custom"></p>
+                <div class="modal-details p-4">
+                    <h2 id="modalTitle" class="modal-title-custom mb-3"></h2>
+                    <p id="modalCaption" class="modal-caption-custom mb-4" style="color: var(--t-muted); font-size: 1.05rem; line-height: 1.6;"></p>
 
-                    <div class="modal-meta">
+                    <div class="modal-meta pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
                         <div class="d-flex align-items-center gap-3">
                             <img id="modalUploaderImg" src=""
                                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                                class="rounded-circle" width="32" height="32"
-                                style="object-fit:cover; border: 1px solid var(--c-border-hi);">
+                                class="rounded-circle" width="45" height="45"
+                                style="object-fit:cover; border: 2px solid var(--a1);">
                             <div>
-                                <div class="meta-label">Shared by</div>
-                                <div id="modalUploader" class="meta-value"></div>
+                                <div class="meta-label" style="font-size: 0.8rem; color: var(--t-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Shared by</div>
+                                <div id="modalUploader" class="meta-value" style="font-weight: 700; color: var(--t-hi); font-size: 1.1rem;"></div>
                             </div>
                         </div>
                     </div>
