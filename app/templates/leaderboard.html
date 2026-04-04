@@ -4,72 +4,81 @@
 <div class="fade-in-up">
     <div class="content-header mb-5">
         <div>
-            <h1 class="display-heading mb-1">Alumni Leaderboard</h1>
-            <p class="text-muted">Celebrating our most active contributors and mentors.</p>
+            <h1 class="display-heading mb-1 gradient-text" style="font-size: 2.5rem;">Community Leaderboard</h1>
+            <p style="color:var(--t-muted); font-size:1rem; max-width: 600px;">Celebrating our top alumni who drive the network forward through leadership and mentorship.</p>
         </div>
-
     </div>
 
     <div class="row g-4">
+        {# Main Leaderboard Table #}
         <div class="col-lg-8">
-            <div class="dash-card">
+            <div class="glass-card p-0 overflow-hidden" style="border-radius: var(--r-lg);">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr class="text-muted smaller fw-bold">
-                                <th class="ps-0">#</th>
-                                <th>Alumnus</th>
-                                <th>Contributions</th>
-                                <th class="text-end pe-0">XP Points</th>
+                    <table class="table table-hover align-middle mb-0" style="--bs-table-bg: transparent; --bs-table-border-color: rgba(255,255,255,0.05);">
+                        <thead style="background: rgba(255,255,255,0.02);">
+                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.05);">
+                                <th class="ps-4 py-3" style="color:var(--t-muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; width: 80px;">Rank</th>
+                                <th class="py-3" style="color:var(--t-muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Member</th>
+                                <th class="py-3" style="color:var(--t-muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Contributions</th>
+                                <th class="text-end pe-4 py-3" style="color:var(--t-muted); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Total XP</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for user in users %}
-                            <tr>
-                                <td class="ps-0">
+                            <tr style="transition: background 0.3s ease; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                <td class="ps-4">
                                     {% if loop.index == 1 %}
-                                    <span class="fs-5">🥇</span>
+                                    <div class="rank-hex silver-glow" style="font-size: 1.4rem; color: #fbbf24; text-shadow: 0 0 15px rgba(251,191,36,0.4);">🥇</div>
                                     {% elif loop.index == 2 %}
-                                    <span class="fs-5">🥈</span>
+                                    <div class="rank-hex" style="font-size: 1.4rem; color: #94a3b8;">🥈</div>
                                     {% elif loop.index == 3 %}
-                                    <span class="fs-5">🥉</span>
+                                    <div class="rank-hex" style="font-size: 1.4rem; color: #b45309;">🥉</div>
                                     {% else %}
-                                    <span class="text-muted fw-bold">#{{ loop.index }}</span>
+                                    <span class="text-muted fw-bold" style="font-family: 'Syne', sans-serif; font-size: 0.9rem; margin-left: 4px;">#{{ loop.index }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}"
-                                            onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                                            class="rounded-circle me-3" width="36" height="36"
-                                            style="border: 2px solid rgba(167, 139, 250, 0.3); object-fit: cover;">
+                                    <div class="d-flex align-items-center py-2">
+                                        <div style="position: relative;">
+                                            <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}"
+                                                onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                                                class="rounded-circle me-3" width="44" height="44"
+                                                style="border: 2px solid rgba(255,255,255,0.1); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                                            {% if loop.index == 1 %}
+                                            <div style="position: absolute; bottom: -2px; right: 10px; background: #fbbf24; color: #000; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; border: 2px solid var(--c-surface);">
+                                                <i class="fas fa-crown"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
                                         <div>
-                                            <div class="fw-bold text-white">{{ user.username }}</div>
-                                            <div class="text-muted smaller">{{ user.alumni_profile.degree }} &middot; {{
-                                                user.alumni_profile.graduation_year }}</div>
+                                            <div class="fw-bold" style="color:var(--t-hi); font-size: 0.95rem;">{{ user.username }}</div>
+                                            <div style="color:var(--t-muted); font-size: 0.75rem; font-weight: 500;">
+                                                {{ user.alumni_profile.degree }} &middot; {{ user.alumni_profile.graduation_year }}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-dark-soft text-muted smaller">
-                                        {{ user.alumni_profile.jobs_posted|length }} Jobs
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge" style="background: rgba(124, 58, 237, 0.1); color: #a78bfa; font-weight: 700; font-size: 0.7rem; border: 1px solid rgba(124,58,237,0.15);">
+                                            {{ user.alumni_profile.jobs_posted|length }} JOBS
+                                        </span>
+                                    </div>
                                 </td>
-                                <td class="text-end pe-0">
+                                <td class="text-end pe-4">
                                     <div class="d-flex flex-column align-items-end">
-                                        <span class="fw-bold text-warning">{{ user.points }}</span>
-                                        <div class="progress"
-                                            style="width: 60px; height: 3px !important; margin-top: 4px;">
-                                            <div class="progress-bar bg-warning"
-                                                style="width: {{ (user.points / (users[0].points if users else 1) * 100)|int }}%">
-                                            </div>
+                                        <span class="fw-bold" style="color:#fbbf24; font-size: 1.1rem; letter-spacing: -0.02em;">{{ user.points }}</span>
+                                        {% set max_pts = users[0].points if users and users[0].points > 0 else 1 %}
+                                        {% set xp_percent = ((user.points / max_pts) * 100) | int %}
+                                        <div class="progress" style="width: 70px; height: 4px !important; margin-top: 6px; background: rgba(251,191,36,0.1); border-radius: 2px; overflow: visible;">
+                                            <div class="progress-bar" style="width:{{ xp_percent }}%; background: #fbbf24; border-radius: 2px; box-shadow: 0 0 8px rgba(251,191,36,0.5);"></div>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">No alumni found.</td>
+                                <td colspan="4" class="text-center py-5 text-muted">Awaiting the first community contributors...</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -78,39 +87,71 @@
             </div>
         </div>
 
+        {# Information Sidebar #}
         <div class="col-lg-4">
-            <div class="dash-card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent);">
-                <h5 class="mb-4 d-flex align-items-center">
-                    <i class="fas fa-info-circle me-2 text-primary"></i> How to Earn XP
+            <div class="glass-card mb-4" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), transparent);">
+                <h5 class="display-heading mb-4" style="font-size: 1.1rem; color: var(--t-hi);">
+                    <i class="fas fa-medal me-2 text-primary"></i> Achievement Levels
                 </h5>
-                <ul class="list-unstyled small mb-0">
-                    <li class="mb-3 d-flex align-items-start">
-                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">10</div>
-                        <div class="text-muted">Complete your Alumni profile for the first time.</div>
+                <div class="achievement-step d-flex gap-3 mb-4">
+                    <div class="step-icon" style="background: rgba(251,191,36,0.1); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(251,191,36,0.2);">
+                        <i class="fas fa-trophy text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold smaller" style="color: var(--t-hi);">Top Contributor</div>
+                        <p class="text-muted m-0" style="font-size: 0.75rem;">Ranked in the top 3 of the community.</p>
+                    </div>
+                </div>
+
+                <hr style="opacity: 0.05;">
+
+                <h6 class="text-muted smaller mb-3 fw-bold mt-4" style="letter-spacing: 0.1em; text-transform: uppercase;">How to earn XP</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="xp-badge me-3">+10</div>
+                        <span class="text-muted smaller">Complete profile for the first time</span>
                     </li>
-                    <li class="mb-3 d-flex align-items-start">
-                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">20</div>
-                        <div class="text-muted">Every job or internship post you share with the community.</div>
+                    <li class="mb-3 d-flex align-items-center">
+                        <div class="xp-badge me-3">+20</div>
+                        <span class="text-muted smaller">Every job or internship shared</span>
                     </li>
-                    <li class="mb-0 d-flex align-items-start">
-                        <div class="badge bg-primary-soft text-primary me-2 mt-1" style="min-width: 24px;">5</div>
-                        <div class="text-muted">Daily login bonus for staying active on the platform.</div>
+                    <li class="d-flex align-items-center">
+                        <div class="xp-badge me-3">+5</div>
+                        <span class="text-muted smaller">Daily active login bonus</span>
                     </li>
                 </ul>
             </div>
 
-            <div class="dash-card mt-4">
-                <h6 class="text-muted smaller mb-3 fw-bold">TOP CONTRIBUTORS</h6>
-                <div class="d-flex flex-wrap gap-2">
-                    {% for user in users[:5] %}
-                    <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}"
-                        onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                        class="rounded-circle border border-2 border-primary" width="32" height="32"
-                        style="object-fit: cover;" title="{{ user.username }} ({{ user.points }} XP)">
-                    {% endfor %}
-                </div>
+            <div class="glass-card" style="border: 1px dashed rgba(255,255,255,0.1); background: transparent;">
+                <p class="text-muted smaller text-center m-0">The leaderboard is updated in real-time based on your contributions.</p>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .xp-badge {
+        background: rgba(124, 58, 237, 0.1);
+        color: #a78bfa;
+        font-weight: 800;
+        font-family: 'Syne', sans-serif;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        min-width: 42px;
+        text-align: center;
+        border: 1px solid rgba(124,58,237,0.15);
+    }
+    .rank-hex {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s ease;
+    }
+    tr:hover .rank-hex { transform: scale(1.2) rotate(5deg); }
+    .glass-card { transition: transform 0.3s ease, border-color 0.3s ease; }
+    .glass-card:hover { border-color: rgba(124, 58, 237, 0.3); }
+</style>
 {% endblock %}

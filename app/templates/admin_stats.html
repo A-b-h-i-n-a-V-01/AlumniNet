@@ -22,8 +22,8 @@
                         </div>
                         <div class="progress" style="height: 12px !important; border-radius: 6px;">
                             {% set percent = (count / total_users * 100)|round|int if total_users > 0 else 0 %}
-                            <div class="progress-bar {% if role == 'admin' %}bg-danger{% elif role == 'alumni' %}bg-primary{% elif role == 'faculty' %}bg-info{% else %}bg-success{% endif %}" 
-                                 style="width: {{ percent }}%">
+                            <div class="progress-bar {% if role == 'admin' %}bg-danger{% elif role == 'alumni' %}bg-primary{% elif role == 'faculty' %}bg-info{% else %}bg-success{% endif %}"
+                                style="width: {{ percent }}%">
                             </div>
                         </div>
                     </div>
@@ -40,13 +40,14 @@
                     {% for approved, count in job_status %}
                     <div class="mb-4">
                         <div class="d-flex justify-content-between small mb-1">
-                            <span class="text-muted">{{ 'Approved Activities' if approved else 'Pending Verification' }}</span>
+                            <span class="text-muted">{{ 'Approved Activities' if approved else 'Pending Verification'
+                                }}</span>
                             <span class="text-white fw-bold">{{ count }}</span>
                         </div>
                         <div class="progress" style="height: 12px !important; border-radius: 6px;">
                             {% set percent = (count / total_jobs * 100)|round|int if total_jobs > 0 else 0 %}
-                            <div class="progress-bar {{ 'bg-success' if approved else 'bg-warning' }}" 
-                                 style="width: {{ percent }}%">
+                            <div class="progress-bar {{ 'bg-success' if approved else 'bg-warning' }}"
+                                style="width: {{ percent }}%">
                             </div>
                         </div>
                     </div>
@@ -73,7 +74,6 @@
                     <div class="col-md-4">
                         <div class="text-muted small text-uppercase mb-2">Security</div>
                         <h2 class="text-success mb-0">Secure</h2>
-                        <small class="text-muted">SSL & Encryption active</small>
                     </div>
                 </div>
             </div>

@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
     pill.id = 'nav-pill';
     pill.style.cssText = `
       position: absolute;
-      left: 12px; right: 12px;
+      left: 6px; right: 6px;
       border-radius: 8px;
       background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(79,70,229,.16));
       border: 1px solid rgba(124,58,237,.32);
@@ -308,6 +308,63 @@ document.addEventListener('DOMContentLoaded', function () {
     const btns = document.querySelectorAll('#theme-toggle, .auth-theme-toggle, .nav-theme-toggle');
     btns.forEach(btn => {
       btn.addEventListener('click', () => toggleTheme(btn));
+    });
+  });
+})();
+// ─── RESPONSIVE SIDEBAR TOGGLE ─────────────────────────────
+(function () {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('sidebarToggle');
+    const closeBtn = document.getElementById('sidebarClose');
+    const sidebar = document.getElementById('sidebarMenu');
+    const overlay = document.getElementById('sidebarOverlay');
+    const body = document.body;
+
+    if (!sidebar || !overlay) return;
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('active');
+      body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      body.style.overflow = '';
+    }
+
+    if (toggle) toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSidebar();
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Close on link click (for mobile SPA feel)
+    const links = sidebar.querySelectorAll('.nav-link');
+    links.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 992) closeSidebar();
+      });
+    });
+
+    // Handle ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+        closeSidebar();
+      }
+    });
+
+    // Reset state on window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992) {
+        closeSidebar();
+      }
     });
   });
 })();

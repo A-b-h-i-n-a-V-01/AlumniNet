@@ -1,48 +1,199 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row h-100 align-items-center justify-content-center">
-    <div class="col-12 col-lg-8">
-        <div class="card bg-surface border-0 d-flex flex-column shadow-lg" style="height: 75vh; border: 1px solid var(--c-border) !important; border-radius: 16px; overflow: hidden;">
-            
-            <!-- Chat Header -->
-            <div class="p-3 border-bottom d-flex align-items-center" style="border-color: var(--c-border) !important; background: rgba(255,255,255,0.02);">
-                <a href="{{ url_for('messages') }}" class="text-muted me-3 hover-text-white transition"><i class="fas fa-arrow-left"></i></a>
-                {% if other_user.image_file and other_user.image_file != 'default.jpg' %}
+<div class="fade-in-up h-100 d-flex flex-column">
+    {# Header with Back Button #}
+    <div class="content-header mb-4 d-flex align-items-center">
+        <a href="{{ url_for('messages') }}" class="btn-icon me-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="d-flex align-items-center">
+            <div class="position-relative me-3">
                 <img src="{{ url_for('static', filename='profile_pics/' + other_user.image_file) }}" 
                      onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                     class="rounded-circle me-3" width="45" height="45" style="object-fit:cover;">
-                {% else %}
-                <img src="{{ url_for('static', filename='profile_pics/default.jpg') }}" 
-                     onerror="this.src='https://ui-avatars.com/api/?name={{ other_user.username }}&background=4c1d95&color=c4b5fd'"
-                     class="rounded-circle me-3" width="45" height="45" style="object-fit:cover;">
-                {% endif %}
-                <div>
-                    <h6 class="mb-0 text-white">{{ other_user.username }}</h6>
-                    <small class="text-muted text-capitalize">{{ other_user.role }}</small>
-                </div>
-                <div class="ms-auto text-muted small opacity-50">
-                    <i class="fas fa-circle text-success" style="font-size: 8px;"></i>
+                     class="rounded-circle border border-2 border-opacity-10 border-white" 
+                     width="48" height="48" style="object-fit:cover;">
+                <span class="status-indicator online"></span>
+            </div>
+            <div>
+                <h5 class="m-0 text-white" style="font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: -0.02em;">{{ other_user.username }}</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="role-tag-sm">{{ other_user.role|upper }}</span>
+                    {% if other_user.role == 'alumni' %}<span class="text-muted smaller">&middot; {{ other_user.alumni_profile.current_company }}</span>{% endif %}
                 </div>
             </div>
+        </div>
+        <div class="ms-auto">
+            <a href="{{ url_for('view_profile', user_id=other_user.id) }}" class="btn btn-glass-sm">
+                <i class="fas fa-user me-2"></i> PROFILE
+            </a>
+        </div>
+    </div>
 
-            <!-- Chat Messages Layout -->
-            <div class="flex-grow-1 p-4 overflow-auto" id="chat-messages" style="background: var(--c-bg);">
-                <div class="d-flex justify-content-center align-items-center h-100">
-                    <div class="text-center text-muted small"><i class="fas fa-circle-notch fa-spin me-2"></i>Loading messages...</div>
+    {# Chat Window Container #}
+    <div class="glass-card chat-container flex-grow-1 d-flex flex-column p-0 overflow-hidden" style="border-radius: var(--r-lg); height: 60vh;">
+        
+        {# Messages Area #}
+        <div class="chat-messages flex-grow-1 p-4" id="chat-messages">
+            <div class="d-flex flex-column align-items-center justify-content-center h-100 opacity-50">
+                <div class="btn-icon mb-3" style="width: 50px; height: 50px; background: rgba(255,255,255,0.05);">
+                    <i class="fas fa-circle-notch fa-spin text-primary"></i>
                 </div>
+                <div class="smaller fw-bold tracking-wider text-uppercase">Synchronizing Messages</div>
             </div>
+        </div>
 
-            <!-- Chat Input -->
-            <div class="p-3 border-top" style="border-color: var(--c-border) !important; background: rgba(255,255,255,0.02);">
-                <form id="chat-form" class="d-flex gap-2">
-                    <input type="text" id="chat-input" class="form-control" style="border-radius: 20px;" placeholder="Type a message..." required autocomplete="off">
-                    <button type="submit" class="btn btn-primary-custom shadow-sm" style="border-radius: 20px; width: 50px;"><i class="fas fa-paper-plane"></i></button>
-                </form>
-            </div>
+        {# Input Bar #}
+        <div class="chat-input-wrapper p-3" style="background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05);">
+            <form id="chat-form" class="d-flex gap-2">
+                <div class="flex-grow-1 position-relative">
+                    <input type="text" id="chat-input" class="form-control chat-input-field" 
+                           placeholder="Message {{ other_user.username }}..." required autocomplete="off">
+                    <div class="input-actions">
+                        <button type="button" class="btn-icon-sm" title="Attach Files"><i class="fas fa-paperclip"></i></button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
         </div>
     </div>
 </div>
+
+<style>
+    .btn-icon {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+        color: var(--t-muted);
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .btn-icon:hover {
+        background: rgba(255,255,255,0.1);
+        color: var(--t-hi);
+        transform: translateY(-2px);
+    }
+    
+    .status-indicator {
+        position: absolute; bottom: 2px; right: 2px;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        border: 2px solid var(--c-surface);
+    }
+    .status-indicator.online { background: #10b981; box-shadow: 0 0 8px #10b981; }
+
+    .role-tag-sm {
+        font-size: 0.6rem; font-weight: 900; letter-spacing: 0.05em;
+        color: #a78bfa; background: rgba(167, 139, 250, 0.1);
+        padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(167, 139, 250, 0.1);
+    }
+
+    .btn-glass-sm {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: var(--t-hi);
+        font-size: 0.7rem; font-weight: 800;
+        padding: 6px 14px; border-radius: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    .btn-glass-sm:hover {
+        background: rgba(124, 58, 237, 0.1);
+        border-color: rgba(124, 58, 237, 0.3);
+        color: #a78bfa;
+    }
+
+    /* Chat Elements */
+    .chat-messages {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+    .chat-messages::-webkit-scrollbar { width: 5px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    .chat-bubble {
+        max-width: 80%;
+        padding: 12px 18px;
+        border-radius: 18px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        position: relative;
+        animation: bubble-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes bubble-pop {
+        from { opacity: 0; transform: scale(0.9) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .bubble-sent {
+        align-self: flex-end;
+        background: var(--grad);
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+    }
+    .bubble-received {
+        align-self: flex-start;
+        background: rgba(255,255,255,0.05);
+        color: var(--t-hi);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-bottom-left-radius: 4px;
+    }
+
+    .bubble-time {
+        font-size: 0.65rem;
+        opacity: 0.5;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .bubble-sent .bubble-time { color: rgba(255,255,255,0.8); }
+
+    /* Input Field */
+    .chat-input-field {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
+        padding: 12px 16px;
+        padding-right: 45px;
+        color: white;
+        transition: all 0.2s ease;
+    }
+    .chat-input-field:focus {
+        background: rgba(255,255,255,0.05);
+        border-color: var(--a1);
+        box-shadow: 0 0 15px rgba(124, 58, 237, 0.1);
+    }
+    .input-actions {
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    }
+    .btn-icon-sm {
+        background: transparent; border: none; color: var(--t-muted);
+        font-size: 0.9rem; transition: color 0.2s;
+    }
+    .btn-icon-sm:hover { color: var(--a1); }
+
+    .btn-send {
+        width: 48px; height: 48px;
+        background: var(--grad);
+        border: none; border-radius: 14px;
+        color: white; display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    .btn-send:hover {
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+    }
+    .btn-send:active { transform: scale(0.95); }
+</style>
 
 <script>
     const otherUserId = {{ other_user.id }};
@@ -54,49 +205,37 @@
     let lastMessageCount = -1;
 
     function renderMessages(msgs) {
-        if(msgs.length === lastMessageCount) return; // no new msgs
+        if(msgs.length === lastMessageCount) return;
         
         chatMessages.innerHTML = '';
         if(msgs.length === 0) {
-            chatMessages.innerHTML = '<div class="text-center text-muted mt-5 small">No messages yet. Say hi!</div>';
+            chatMessages.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 opacity-50">
+                    <i class="fas fa-comment-dots fa-3x mb-3"></i>
+                    <div class="smaller fw-bold tracking-wider text-uppercase">Start your conversation with ${msgs.username || '{{ other_user.username }}'}</div>
+                </div>`;
         }
         
         msgs.forEach(msg => {
             const isMe = msg.sender_id === currentUserId;
+            
             const bubbleWrap = document.createElement('div');
-            bubbleWrap.className = `d-flex flex-column mb-3 ${isMe ? 'align-items-end' : 'align-items-start'}`;
+            bubbleWrap.className = `d-flex flex-column mb-1 ${isMe ? 'align-items-end' : 'align-items-start'}`;
             
             const contentDiv = document.createElement('div');
-            contentDiv.style.maxWidth = '75%';
-            contentDiv.style.padding = '12px 18px';
-            contentDiv.style.borderRadius = '18px';
-            contentDiv.style.fontSize = '0.95rem';
+            contentDiv.className = `chat-bubble ${isMe ? 'bubble-sent' : 'bubble-received'}`;
             contentDiv.innerText = msg.content;
             
-            if(isMe){
-                contentDiv.style.background = 'var(--c-primary)';
-                contentDiv.style.color = 'white';
-                contentDiv.style.borderBottomRightRadius = '4px';
-            } else {
-                contentDiv.style.background = 'var(--c-surface)';
-                contentDiv.style.color = 'var(--c-text)';
-                contentDiv.style.border = '1px solid var(--c-border)';
-                contentDiv.style.borderBottomLeftRadius = '4px';
-            }
-            
-            const timeDiv = document.createElement('small');
-            timeDiv.className = 'text-muted mt-1 opacity-50';
-            timeDiv.style.fontSize = '0.65rem';
-            // format naive timestamp
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'bubble-time';
             const date = new Date(msg.timestamp + 'Z');
             timeDiv.innerText = isNaN(date.getTime()) ? msg.timestamp : date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
+            contentDiv.appendChild(timeDiv);
             bubbleWrap.appendChild(contentDiv);
-            bubbleWrap.appendChild(timeDiv);
             chatMessages.appendChild(bubbleWrap);
         });
         
-        // scroll to bottom smoothly if not first load, else instantly
         if(lastMessageCount === -1) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         } else {
@@ -129,13 +268,12 @@
         }).then(res => res.json())
           .then(data => {
               if(data.status === 'success') {
-                  fetchMessages(); // fetch immediately to show
+                  fetchMessages();
               }
           });
     });
 
-    // Run interval
     fetchMessages();
-    setInterval(fetchMessages, 2500); // Poll every 2.5 seconds
+    setInterval(fetchMessages, 2500); 
 </script>
 {% endblock %}

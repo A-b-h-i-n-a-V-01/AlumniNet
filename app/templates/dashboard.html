@@ -6,8 +6,8 @@
     <div class="hero-banner stagger-element">
         <div class="hero-banner-content">
             <img src="{{ url_for('static', filename='images/sngce_logo.png') }}" alt="SNGCE Logo" class="hero-logo">
-            <h1 class="hero-banner-title">SNGCE Alumni Network</h1>
-            <p class="hero-banner-subtitle">Connecting Students, Alumni, and Faculty</p>
+            <h1 class="hero-banner-title">SNGCE&nbsp;Alumni<br>Network</h1>
+            <p class="hero-banner-subtitle">Your Network Beyond Campus</p>
         </div>
     </div>
 
@@ -15,8 +15,12 @@
     <div class="about-sngce stagger-element">
         <div class="about-text-content">
             <h2>About SNGCE</h2>
-            <p>Sree Narayana Gurukulam College of Engineering (SNGCE) is a pioneer, self-financing educational institution established in the year 2002 to impart engineering and management education with state-of-the-art amenities. Managed by the Sree Narayana Gurukulam Charitable Trust, SNGCE has established itself as a premier destination for transformative technical education in Kerala.</p>
-            <a href="https://sngce.ac.in/" target="_blank" class="btn btn-outline-primary btn-sm">Visit Official Website</a>
+            <p>Sree Narayana Gurukulam College of Engineering (SNGCE) is a pioneer, self-financing educational
+                institution established in the year 2002 to impart engineering and management education with
+                state-of-the-art amenities. Managed by the Sree Narayana Gurukulam Charitable Trust, SNGCE has
+                established itself as a premier destination for transformative technical education in Kerala.</p>
+            <a href="https://sngce.ac.in/" target="_blank" class="btn btn-outline-primary btn-sm">Visit Official
+                Website</a>
         </div>
         <div class="about-image-wrap">
             <img src="{{ url_for('static', filename='images/8eaae99cf0082671.jpg') }}" alt="SNGCE Campus">
@@ -28,15 +32,19 @@
         <div class="vm-card">
             <div class="icon-box"><i class="fas fa-eye"></i></div>
             <h3>Our Vision</h3>
-            <p>Realization of a self-contained centre of excellence for value-based transformative education, research and innovation.</p>
+            <p>Realization of a self-contained centre of excellence for value-based transformative education, research
+                and innovation.</p>
         </div>
         <div class="vm-card">
             <div class="icon-box"><i class="fas fa-bullseye"></i></div>
             <h3>Our Mission</h3>
             <ul class="vm-list">
-                <li>To be led by consistent standards, that will place the institution on a high plane of excellence in education, research, innovation and creativity.</li>
-                <li>To produce globally competent professionals through excellent teaching-learning process and industry interaction.</li>
-                <li>To transform learners into better citizens with ingrained values, knowledge, skills and aptitude to serve society.</li>
+                <li>To be led by consistent standards, that will place the institution on a high plane of excellence in
+                    education, research, innovation and creativity.</li>
+                <li>To produce globally competent professionals through excellent teaching-learning process and industry
+                    interaction.</li>
+                <li>To transform learners into better citizens with ingrained values, knowledge, skills and aptitude to
+                    serve society.</li>
             </ul>
         </div>
     </div>
@@ -57,7 +65,8 @@
         </div>
         <div class="col-md-4">
             <div class="dash-card text-center h-100" style="padding:32px 20px;">
-                <div class="feature-icon mx-auto mb-3" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);">
+                <div class="feature-icon mx-auto mb-3"
+                    style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);">
                     <i class="fas fa-briefcase" style="color:#34D399;"></i>
                 </div>
                 <div class="stat-number" style="color:#34D399;">{{ jobs_count }}</div>
@@ -66,7 +75,8 @@
         </div>
         <div class="col-md-4">
             <div class="dash-card text-center h-100" style="padding:32px 20px;">
-                <div class="feature-icon mx-auto mb-3" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);">
+                <div class="feature-icon mx-auto mb-3"
+                    style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.3);">
                     <i class="fas fa-clock" style="color:#FCD34D;"></i>
                 </div>
                 <div class="stat-number" style="color:#FCD34D;">{{ pending_alumni }}</div>
@@ -77,49 +87,13 @@
 
     {# FACULTY #}
     {% elif current_user.role == 'faculty' %}
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="dash-card h-100">
-                <h5 class="mb-4" style="color:var(--t-hi); font-weight:700;">
-                    <i class="fas fa-user-graduate me-2" style="color:var(--info);"></i>Pending Alumni
-                </h5>
-                {% if pending_alumni %}
-                <div class="list-group list-group-flush">
-                    {% for profile in pending_alumni %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <div>
-                            <div class="fw-semibold" style="color:var(--t-hi);">{{ profile.user.username }}</div>
-                            <small style="color:var(--t-muted);">{{ profile.graduation_year }} &middot; {{ profile.degree }}</small>
-                        </div>
-                        <a href="{{ url_for('approve_alumni', profile_id=profile.id) }}" class="btn btn-primary-custom btn-sm">Approve</a>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p style="color:var(--t-muted); text-align:center; padding:32px 0;">No pending approvals.</p>
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="dash-card h-100">
-                <h5 class="mb-4" style="color:var(--t-hi); font-weight:700;">
-                    <i class="fas fa-briefcase me-2" style="color:var(--warning);"></i>Pending Job Posts
-                </h5>
-                {% if pending_jobs %}
-                <div class="list-group list-group-flush">
-                    {% for job in pending_jobs %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <div>
-                            <div class="fw-semibold" style="color:var(--t-hi);">{{ job.title }}</div>
-                            <small style="color:var(--t-muted);">{{ job.author.user.username }} &middot; {{ job.company }}</small>
-                        </div>
-                        <a href="{{ url_for('approve_job', job_id=job.id) }}" class="btn btn-primary-custom btn-sm">Verify</a>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p style="color:var(--t-muted); text-align:center; padding:32px 0;">No pending job approvals.</p>
-                {% endif %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="dash-card">
+                <h2
+                    style="font-family:'Syne', sans-serif; font-weight:800; background:var(--grad-text); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:10px;">
+                    Welcome, Prof. {{ current_user.username }}</h2>
+                <p style="color:var(--t-muted); margin:0;">Institutional governance and community oversight center.</p>
             </div>
         </div>
     </div>
@@ -132,161 +106,231 @@
     {% elif current_user.role == 'student' %}
     <div class="row g-4">
         <div class="col-md-8">
-                <h5 class="mb-4" style="color:var(--t-hi); font-weight:700;">Recommended Opportunities</h5>
-                {% if jobs %}
-                <div class="d-flex flex-column gap-3">
-                    {% for job in jobs %}
-                    <div class="job-card-clickable" 
-                         style="background:rgba(255,255,255,.03); border:1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:all .2s;"
-                         data-title="{{ job.title }}"
-                         data-company="{{ job.company }}"
-                         data-location="{{ job.location }}"
-                         data-type="{{ job.type if job.type else 'Full Time' }}"
-                         data-description="{{ job.description }}"
-                         data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
-                         data-posted-by="{{ job.author.user.username }}"
-                         data-apply-link="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
-                         onclick="viewJobDetails(this)">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 style="font-weight:700; color:#a78bfa; margin:0;">{{ job.title }}</h6>
-                            <small style="color:var(--t-muted);">{{ job.date_posted.strftime('%d %b') }}</small>
-                        </div>
-                        <div style="color:var(--t-muted); font-size:.825rem; margin-bottom:10px;">{{ job.company }} &middot; {{ job.location }}</div>
-                        <p style="color:var(--t-muted); font-size:.85rem; margin-bottom:14px;">{{ job.description[:100] }}...</p>
-                        <a href="{{ job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link }}"
-                           target="_blank" class="btn btn-primary-custom btn-sm" onclick="event.stopPropagation();">Apply Now</a>
+            <h5 class="mb-4" style="color:var(--t-hi); font-weight:700;">Recommended Opportunities</h5>
+            {% if jobs %}
+            <div class="d-flex flex-column gap-3">
+                {% for job in jobs %}
+                <div class="job-card-clickable"
+                    style="background:rgba(255,255,255,.03); border:1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:all .2s;"
+                    data-title="{{ job.title }}" data-company="{{ job.company }}" data-location="{{ job.location }}"
+                    data-type="{{ job.job_type if job.job_type else 'Full Time' }}"
+                    data-description="{{ job.description }}" data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
+                    data-posted-by="{{ job.author.user.username }}"
+                    data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
+                    onclick="viewJobDetails(this)">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 style="font-weight:700; color:#a78bfa; margin:0;">{{ job.title }}</h6>
+                        <small style="color:var(--t-muted);">{{ job.date_posted.strftime('%d %b') }}</small>
                     </div>
-                    {% endfor %}
+                    <div style="color:var(--t-muted); font-size:.825rem; margin-bottom:10px;">{{ job.company }} &middot;
+                        {{ job.location }}</div>
+                    <p style="color:var(--t-muted); font-size:.85rem; margin-bottom:14px;">{{ job.description[:100]
+                        }}...</p>
+                    <a href="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
+                        target="_blank" class="btn btn-primary-custom btn-sm" onclick="event.stopPropagation();">Apply
+                        Now</a>
                 </div>
-                <div class="text-center mt-4">
-                    <a href="{{ url_for('jobs') }}" class="btn btn-outline-primary btn-sm">View All Jobs</a>
-                </div>
-                {% else %}
-                <div style="text-align:center; padding:48px 0; color:var(--t-muted);">
-                    <i class="fas fa-briefcase fa-2x mb-3 d-block" style="opacity:.3;"></i>
-                    No jobs posted recently.
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
+            <div class="text-center mt-4 mb-4">
+                <a href="{{ url_for('jobs') }}" class="btn btn-outline-primary btn-sm">View All Jobs</a>
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:48px 0; color:var(--t-muted);">
+                <i class="fas fa-briefcase fa-2x mb-3 d-block" style="opacity:.3;"></i>
+                No jobs posted recently.
+            </div>
+            {% endif %}
         </div>
         <div class="col-md-4">
-            <div class="dash-card mb-4 text-center" style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(79,70,229,.05)); border: 1px solid rgba(124,58,237,.15);">
+            <div class="dash-card mb-4 text-center"
+                style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(79,70,229,.05)); border: 1px solid rgba(124,58,237,.15);">
                 <div class="stat-label mb-2">My Profile</div>
-                <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; line-height: 55px;"><i class="fas fa-user-graduate"></i></div>
+                <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; line-height: 55px;"><i
+                        class="fas fa-user-graduate"></i></div>
                 <a href="{{ url_for('profile') }}" class="btn btn-outline-primary btn-sm w-100">Update Info</a>
             </div>
-            <!-- Skills Gap section has been removed to simplify User Experience -->
-
         </div>
     </div>
-
     {% endif %}
 
     {# GLOBAL: Alumni Events Gallery #}
     <div class="dash-card mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 style="color:var(--t-hi); font-weight:700; margin:0;">
-                <i class="fas fa-camera-retro me-2" style="color:var(--primary);"></i>Community Events Gallery
-            </h5>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-4">
+                <h5 style="color:var(--t-hi); font-weight:700; margin:0;">
+                    <i class="fas fa-images me-2" style="color:var(--primary);"></i>Community Gallery
+                </h5>
+                <div class="nav nav-pills gallery-pills" id="galleryTabs" role="tablist">
+                    <button class="nav-link active" id="events-tab" data-bs-toggle="pill"
+                        data-bs-target="#events-content" type="button" role="tab">Events</button>
+                    <button class="nav-link" id="posters-tab" data-bs-toggle="pill" data-bs-target="#posters-content"
+                        type="button" role="tab">Job Posters</button>
+                </div>
+            </div>
             {% if current_user.role == 'alumni' %}
-            <a href="{{ url_for('upload_event_photo') }}" class="btn btn-primary-custom btn-sm">
-                <i class="fas fa-upload me-1"></i> Share Moment
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('upload_event_photo', category='job_poster') }}"
+                    class="btn btn-primary-custom btn-sm rounded-pill px-4">
+                    <i class="fas fa-file-export me-1"></i> SHARE JOB POSTER
+                </a>
+            </div>
+            {% elif current_user.role in ['faculty', 'admin'] %}
+            <a href="{{ url_for('upload_event_photo', category='event') }}"
+                class="btn btn-primary-custom btn-sm rounded-pill px-4">
+                <i class="fas fa-plus me-1"></i> UPLOAD EVENT PHOTO
             </a>
             {% endif %}
         </div>
 
-        {% if event_photos %}
-        <div class="gallery-grid">
-            {% for photo in event_photos %}
-            <div class="gallery-card" 
-                 data-bs-path="{{ url_for('static', filename='event_photos/' + photo.image_path) }}" 
-                 data-bs-title="{{ photo.event_name }}" 
-                 data-bs-caption="{{ photo.caption }}" 
-                 data-bs-uploader="{{ photo.uploader.username }}"
-                 data-bs-uploader-img="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}"
-                 onclick="viewGallery(this)">
-                
-                {# Delete Button - Only visible to owner or admin #}
-                {% if current_user.id == photo.user_id or current_user.role == 'admin' %}
-                <a href="{{ url_for('delete_event_photo', photo_id=photo.id) }}" 
-                   class="gallery-delete-btn" 
-                   onclick="event.stopPropagation(); return confirm('Are you sure you want to delete this photo? This action cannot be undone.');"
-                   title="Delete Photo">
-                    <i class="fas fa-trash-alt"></i>
-                </a>
+        <div class="tab-content" id="galleryTabContent">
+            <div class="tab-pane fade show active" id="events-content" role="tabpanel">
+                {% if event_photos %}
+                <div class="gallery-grid">
+                    {% for photo in event_photos %}
+                    <div class="gallery-card"
+                        data-bs-path="{{ url_for('static', filename='event_photos/' + photo.image_path) }}"
+                        data-bs-title="{{ photo.event_name }}" data-bs-caption="{{ photo.caption }}"
+                        data-bs-uploader="{{ photo.uploader.username }}"
+                        data-bs-uploader-img="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}"
+                        onclick="viewGallery(this)">
+
+                        {% if current_user.id == photo.user_id or current_user.role == 'admin' %}
+                        <a href="{{ url_for('delete_event_photo', photo_id=photo.id) }}" class="gallery-delete-btn"
+                            onclick="event.stopPropagation(); return confirm('Are you sure?');">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                        {% endif %}
+
+                        <img src="{{ url_for('static', filename='event_photos/' + photo.image_path) }}"
+                            alt="{{ photo.event_name }}" loading="lazy">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h6>{{ photo.event_name }}</h6>
+                                <p>{{ photo.caption[:40] }}{% if photo.caption|length > 40 %}...{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5" style="color:var(--t-muted); opacity: 0.6;">
+                    <i class="fas fa-camera-retro fa-2x mb-3"></i>
+                    <p>No event photos yet.</p>
+                </div>
                 {% endif %}
-                
-                <img src="{{ url_for('static', filename='event_photos/' + photo.image_path) }}" 
-                     alt="{{ photo.event_name }}" loading="lazy">
-                
-                <div class="gallery-overlay">
-                    <div class="gallery-info">
-                        <h6>{{ photo.event_name }}</h6>
-                        <p>{{ photo.caption[:40] }}{% if photo.caption|length > 40 %}...{% endif %}</p>
-                    </div>
-                    <div class="gallery-uploader">
-                        <img src="{{ url_for('static', filename='profile_pics/' + photo.uploader.image_file) }}" 
-                             onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                             class="rounded-circle" width="16" height="16" style="object-fit:cover;">
-                        <span>@{{ photo.uploader.username }}</span>
-                    </div>
-                </div>
             </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div style="text-align:center; padding:48px 0; color:var(--t-muted); border:1px dashed var(--c-border); border-radius:var(--r);">
-            <i class="fas fa-images fa-2x mb-3 d-block" style="opacity:.2;"></i>
-            <p style="font-size:.85rem; margin:0;">No event photos shared yet. Be the first to share!</p>
-        </div>
-        {% endif %}
-    </div>
 
-</div>
+            <div class="tab-pane fade" id="posters-content" role="tabpanel">
+                {% if job_posters %}
+                <div class="gallery-grid">
+                    {% for poster in job_posters %}
+                    <div class="gallery-card"
+                        data-bs-path="{{ url_for('static', filename='event_photos/' + poster.image_path) }}"
+                        data-bs-title="{{ poster.event_name }}" data-bs-caption="{{ poster.caption }}"
+                        data-bs-uploader="{{ poster.uploader.username }}"
+                        data-bs-uploader-img="{{ url_for('static', filename='profile_pics/' + poster.uploader.image_file) }}"
+                        onclick="viewGallery(this)">
 
-<!-- Refined Lightbox Modal -->
-<div id="galleryModal" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4 z-3" data-bs-dismiss="modal" aria-label="Close"></button>
-                
-                <div class="modal-img-wrap">
-                    <img id="modalImg" src="">
+                        {% if current_user.id == poster.user_id or current_user.role == 'admin' %}
+                        <a href="{{ url_for('delete_event_photo', photo_id=poster.id) }}" class="gallery-delete-btn"
+                            onclick="event.stopPropagation(); return confirm('Are you sure?');">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                        {% endif %}
+
+                        <img src="{{ url_for('static', filename='event_photos/' + poster.image_path) }}"
+                            alt="{{ poster.event_name }}" loading="lazy">
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h6>{{ poster.event_name }}</h6>
+                                <p>{{ poster.caption[:40] }}{% if poster.caption|length > 40 %}...{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                
-                <div class="modal-details">
-                    <h2 id="modalTitle" class="modal-title-custom"></h2>
-                    <p id="modalCaption" class="modal-caption-custom"></p>
-                    
-                    <div class="modal-meta">
-                        <div class="d-flex align-items-center gap-3">
-                            <img id="modalUploaderImg" src="" 
-                                 onerror="this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
-                                 class="rounded-circle" width="32" height="32" style="object-fit:cover; border: 1px solid var(--c-border-hi);">
-                            <div>
-                                <div class="meta-label">Shared by</div>
-                                <div id="modalUploader" class="meta-value"></div>
+                {% else %}
+                <div class="text-center py-5" style="color:var(--t-muted); opacity: 0.6;">
+                    <i class="fas fa-file-invoice fa-2x mb-3"></i>
+                    <p>No job posters shared yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <style>
+            .gallery-pills .nav-link {
+                background: rgba(255, 255, 255, 0.02);
+                color: var(--t-muted);
+                font-weight: 700;
+                font-size: 0.75rem;
+                padding: 6px 16px;
+                border-radius: 50px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                transition: all 0.3s ease;
+            }
+
+            .gallery-pills .nav-link.active {
+                background: var(--primary) !important;
+                color: white !important;
+                border-color: transparent;
+            }
+        </style>
+
+        <!-- Refined Lightbox Modal -->
+        <div id="galleryModal" class="modal fade" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4 z-3"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+
+                        <div class="modal-img-wrap">
+                            <img id="modalImg" src="">
+                        </div>
+
+                        <div class="modal-details">
+                            <h2 id="modalTitle" class="modal-title-custom"></h2>
+                            <p id="modalCaption" class="modal-caption-custom"></p>
+
+                            <div class="modal-meta">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img id="modalUploaderImg" src=""
+                                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
+                                        class="rounded-circle" width="32" height="32"
+                                        style="object-fit:cover; border: 1px solid var(--c-border-hi);">
+                                    <div>
+                                        <div class="meta-label">Shared by</div>
+                                        <div id="modalUploader" class="meta-value"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<script>
-function viewGallery(el) {
-    document.getElementById('modalImg').src = el.getAttribute('data-bs-path');
-    document.getElementById('modalTitle').innerText = el.getAttribute('data-bs-title');
-    document.getElementById('modalCaption').innerText = el.getAttribute('data-bs-caption');
-    document.getElementById('modalUploader').innerText = '@' + el.getAttribute('data-bs-uploader');
-    document.getElementById('modalUploaderImg').src = el.getAttribute('data-bs-uploader-img');
-    
-    var myModal = new bootstrap.Modal(document.getElementById('galleryModal'));
-    myModal.show();
-}
-</script>
-{% endblock %}
+        <script>
+            let galleryModal;
 
+            function viewGallery(el) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                if (!galleryModal) {
+                    galleryModal = new bootstrap.Modal(document.getElementById('galleryModal'));
+                }
+
+                document.getElementById('modalImg').src = el.getAttribute('data-bs-path');
+                document.getElementById('modalTitle').innerText = el.getAttribute('data-bs-title');
+                document.getElementById('modalCaption').innerText = el.getAttribute('data-bs-caption');
+                document.getElementById('modalUploader').innerText = '@' + el.getAttribute('data-bs-uploader');
+                document.getElementById('modalUploaderImg').src = el.getAttribute('data-bs-uploader-img');
+
+                galleryModal.show();
+            }
+        </script>
+        {% endblock %}
