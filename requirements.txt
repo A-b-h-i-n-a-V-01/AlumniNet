@@ -4,6 +4,6 @@ Flask-Login
 Flask-Bcrypt
 Flask-WTF
 email_validator
-pymysql
+psycopg2-binary
 cryptography
 gunicorn
