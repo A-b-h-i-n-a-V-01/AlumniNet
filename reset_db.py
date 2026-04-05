@@ -1,6 +1,6 @@
 import os
 from app import create_app, db
-from app.models import User, FacultyProfile, AlumniProfile, StudentProfile, Job, Roadmap, Skill, Badge, Certificate
+from app.models import User, FacultyProfile, AlumniProfile, StudentProfile, Job
 
 def reset_database():
     app = create_app()

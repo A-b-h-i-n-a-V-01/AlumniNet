@@ -85,12 +85,8 @@ If you prefer manual creation, the system requires the following core tables (au
 - `alumni_profile`: Career and graduation details for Alumni.
 - `student_profile`: Academic details for Students.
 - `faculty_profile`: Departmental details for Faculty.
-- `skill` & `badge`: Skills and gamification achievements.
-- `user_skills` & `user_badges`: Many-to-many relationships for user capabilities.
-- `certificate`: Professional credentials and verification.
 - `message`: Private chat historical records and status.
 - `job`: Career opportunities and application management.
-- `roadmap` & `roadmap_step`: Career path documentation by Alumni.
 - `point_transaction`: Gamification history and ledger.
 - `event_photo`: Community gallery content.
 
@@ -196,46 +192,6 @@ CREATE TABLE faculty_profile (
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
--- Skills & Badges
-CREATE TABLE skill (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL
-);
-
-CREATE TABLE badge (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    icon_class VARCHAR(50),
-    description VARCHAR(200)
-);
-
--- Association Tables
-CREATE TABLE user_skills (
-    user_id INT NOT NULL,
-    skill_id INT NOT NULL,
-    PRIMARY KEY (user_id, skill_id),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (skill_id) REFERENCES skill(id) ON DELETE CASCADE
-);
-
-CREATE TABLE user_badges (
-    user_id INT NOT NULL,
-    badge_id INT NOT NULL,
-    PRIMARY KEY (user_id, badge_id),
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (badge_id) REFERENCES badge(id) ON DELETE CASCADE
-);
-
--- Certificates
-CREATE TABLE certificate (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    issuing_org VARCHAR(100) NOT NULL,
-    file_path VARCHAR(200) NOT NULL,
-    is_verified BOOLEAN DEFAULT FALSE,
-    user_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-);
 
 -- Jobs
 CREATE TABLE job (
@@ -254,23 +210,6 @@ CREATE TABLE job (
     FOREIGN KEY (user_id) REFERENCES alumni_profile(id) ON DELETE CASCADE
 );
 
--- Roadmaps
-CREATE TABLE roadmap (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    description VARCHAR(300),
-    alumni_id INT NOT NULL,
-    FOREIGN KEY (alumni_id) REFERENCES alumni_profile(id) ON DELETE CASCADE
-);
-
-CREATE TABLE roadmap_step (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    description TEXT,
-    `order` INT NOT NULL,
-    roadmap_id INT NOT NULL,
-    FOREIGN KEY (roadmap_id) REFERENCES roadmap(id) ON DELETE CASCADE
-);
 
 -- Messages (Chat System)
 CREATE TABLE message (

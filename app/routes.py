@@ -4,7 +4,7 @@ from flask import render_template, request, redirect, url_for, flash, abort, jso
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt
 from datetime import datetime, timedelta
-from app.models import User, Job, AlumniProfile, StudentProfile, Certificate, FacultyProfile, Message, PointTransaction, EventPhoto
+from app.models import User, Job, AlumniProfile, StudentProfile, FacultyProfile, Message, PointTransaction, EventPhoto
 from app.forms import RegistrationForm, LoginForm, JobPostForm, AlumniProfileForm, StudentProfileForm, FacultyProfileForm, EventPhotoForm, JobPosterForm
 
 from functools import wraps

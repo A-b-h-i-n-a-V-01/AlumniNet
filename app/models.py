@@ -6,16 +6,6 @@ from app import db, login_manager
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Association Tables
-user_skills = db.Table('user_skills',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('skill_id', db.Integer, db.ForeignKey('skill.id'), primary_key=True)
-)
-
-user_badges = db.Table('user_badges',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('badge_id', db.Integer, db.ForeignKey('badge.id'), primary_key=True)
-)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,9 +21,6 @@ class User(db.Model, UserMixin):
     alumni_profile = db.relationship('AlumniProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
     student_profile = db.relationship('StudentProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
     faculty_profile = db.relationship('FacultyProfile', backref='user', uselist=False, lazy=True, cascade="all, delete-orphan")
-    certificates = db.relationship('Certificate', backref='owner', lazy=True, cascade="all, delete-orphan")
-    skills = db.relationship('Skill', secondary=user_skills, lazy='subquery', backref=db.backref('users', lazy=True))
-    badges = db.relationship('Badge', secondary=user_badges, lazy='subquery', backref=db.backref('users', lazy=True))
     
     # Points for gamification
     points = db.Column(db.Integer, default=0, server_default='0')
@@ -55,7 +42,6 @@ class AlumniProfile(db.Model):
     is_approved = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected
     
     jobs_posted = db.relationship('Job', backref='author', lazy=True, cascade="all, delete-orphan")
-    roadmaps = db.relationship('Roadmap', backref='author', lazy=True, cascade="all, delete-orphan")
 
 class StudentProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,37 +73,7 @@ class Job(db.Model):
     application_deadline = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('alumni_profile.id'), nullable=False)
 
-class Certificate(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    issuing_org = db.Column(db.String(100), nullable=False)
-    file_path = db.Column(db.String(200), nullable=False)
-    is_verified = db.Column(db.Boolean, default=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-class Skill(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-
-class Badge(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    icon_class = db.Column(db.String(50)) # FontAwesome class
-    description = db.Column(db.String(200))
-
-class Roadmap(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(300))
-    alumni_id = db.Column(db.Integer, db.ForeignKey('alumni_profile.id'), nullable=False)
-    steps = db.relationship('RoadmapStep', backref='roadmap', lazy=True, cascade="all, delete-orphan")
-
-class RoadmapStep(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    order = db.Column(db.Integer, nullable=False)
-    roadmap_id = db.Column(db.Integer, db.ForeignKey('roadmap.id'), nullable=False)
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
