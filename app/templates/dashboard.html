@@ -2,17 +2,33 @@
 {% block content %}
 <div class="fade-in-up">
 
-    {# SNGCE Hero Banner #}
-    <div class="hero-banner stagger-element">
-        <div class="hero-banner-content">
-            <img src="{{ url_for('static', filename='images/sngce_logo.png') }}" alt="SNGCE Logo" class="hero-logo">
-            <h1 class="hero-banner-title">SNGCE&nbsp;Alumni<br>Network</h1>
-            <p class="hero-banner-subtitle">Your Network Beyond Campus</p>
+    {# Redefined Split Hero Banner #}
+    {# Redefined Faded Hero Banner #}
+    <div class="hero-faded stagger-element parallax-container">
+        <div class="hero-faded-image"></div>
+        <div class="hero-faded-content">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <img src="{{ url_for('static', filename='images/sngce_logo.png') }}" alt="SNGCE Logo"
+                    class="hero-mini-logo">
+                <div class="v-divider"></div>
+                <span class="hero-tag">Official Alumni Portal</span>
+            </div>
+            <h1 class="hero-split-title">SNGCE Alumni<br><span>Network</span></h1>
+            <p class="hero-split-subtitle">Your Network Beyond Campus. </p>
+
+            <div class="hero-actions mt-4">
+                <a href="{{ url_for('search') }}" class="btn btn-primary-custom px-4 py-3">
+                    <i class="fas fa-users me-2"></i> Explore Directory
+                </a>
+                <a href="{{ url_for('jobs') }}" class="btn btn-outline-secondary px-4 py-3 rounded-pill ms-2 fw-700">
+                    View Jobs
+                </a>
+            </div>
         </div>
     </div>
 
     {# About SNGCE Section #}
-    <div class="about-sngce stagger-element">
+    <div class="about-sngce" data-reveal="fade-up">
         <div class="about-text-content">
             <h2>About SNGCE</h2>
             <p>Sree Narayana Gurukulam College of Engineering (SNGCE) is a pioneer, self-financing educational
@@ -22,13 +38,14 @@
             <a href="https://sngce.ac.in/" target="_blank" class="btn btn-outline-primary btn-sm">Visit Official
                 Website</a>
         </div>
-        <div class="about-image-wrap">
-            <img src="{{ url_for('static', filename='images/8eaae99cf0082671.jpg') }}" alt="SNGCE Campus">
+        <div class="about-image-wrap" data-reveal="scale-up">
+            <img src="{{ url_for('static', filename='images/fac.jpg') }}" alt="SNGCE Campus">
         </div>
     </div>
 
     {# Vision & Mission Section #}
-    <div class="vm-grid stagger-element">
+    {# Vision/Mission Grid #}
+    <div class="vm-grid reveal-group" data-reveal="fade-up">
         <div class="vm-card">
             <div class="icon-box"><i class="fas fa-eye"></i></div>
             <h3>Our Vision</h3>
@@ -87,7 +104,8 @@
 
     {# FACULTY #}
     {% elif current_user.role == 'faculty' %}
-    <div class="row g-4 mb-4">
+    {# Stats Row #}
+    <div class="row g-4 mb-5 reveal-group" data-reveal="fade-up">
         <div class="col-12">
             <div class="dash-card">
                 <h2
@@ -111,10 +129,11 @@
             <div class="d-flex flex-column gap-3">
                 {% for job in jobs %}
                 <div class="job-card-clickable"
-                    style="background:rgba(255,255,255,.03); border:1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:all .2s;"
+                    style="background: var(--c-surface-2); border: 1px solid var(--c-border); border-radius:var(--r); padding:18px 20px; transition:all .2s;"
                     data-title="{{ job.title }}" data-company="{{ job.company }}" data-location="{{ job.location }}"
                     data-type="{{ job.job_type if job.job_type else 'Full Time' }}"
                     data-description="{{ job.description }}" data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
+                    data-deadline="{{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else '' }}"
                     data-posted-by="{{ job.author.user.username }}"
                     data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                     onclick="viewJobDetails(this)">
@@ -142,9 +161,9 @@
             </div>
             {% endif %}
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 mt-5">
             <div class="dash-card mb-4 text-center"
-                style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(79,70,229,.05)); border: 1px solid rgba(124,58,237,.15);">
+                style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                 <div class="stat-label mb-2">My Profile</div>
                 <div class="feature-icon mx-auto mb-3" style="width: 60px; height: 60px; line-height: 55px;"><i
                         class="fas fa-user-graduate"></i></div>
@@ -266,7 +285,7 @@
                 font-size: 0.75rem;
                 padding: 6px 16px;
                 border-radius: 50px;
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--c-border-hi);
                 transition: all 0.3s ease;
             }
 
@@ -286,7 +305,8 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content modal-content-custom">
             <div class="modal-body p-0">
-                <button type="button" class="btn-close btn-close-white position-absolute" style="top: 20px; right: 20px; z-index: 1060; background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 50%; opacity: 1;"
+                <button type="button" class="btn-close btn-close-white position-absolute"
+                    style="top: 20px; right: 20px; z-index: 1060; background-color: rgba(0,0,0,0.5); padding: 12px; border-radius: 50%; opacity: 1;"
                     data-bs-dismiss="modal" aria-label="Close"></button>
 
                 <div class="modal-img-wrap" style="background: rgba(0,0,0,0.2);">
@@ -295,17 +315,21 @@
 
                 <div class="modal-details p-4">
                     <h2 id="modalTitle" class="modal-title-custom mb-3"></h2>
-                    <p id="modalCaption" class="modal-caption-custom mb-4" style="color: var(--t-muted); font-size: 1.05rem; line-height: 1.6;"></p>
+                    <p id="modalCaption" class="modal-caption-custom mb-4"
+                        style="color: var(--t-muted); font-size: 1.05rem; line-height: 1.6;"></p>
 
-                    <div class="modal-meta pt-4" style="border-top: 1px solid rgba(255,255,255,0.08);">
+                    <div class="modal-meta pt-4" style="border-top: 1px solid var(--c-border-hi);">
                         <div class="d-flex align-items-center gap-3">
                             <img id="modalUploaderImg" src=""
                                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='profile_pics/default.jpg') }}'"
                                 class="rounded-circle" width="45" height="45"
                                 style="object-fit:cover; border: 2px solid var(--a1);">
                             <div>
-                                <div class="meta-label" style="font-size: 0.8rem; color: var(--t-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Shared by</div>
-                                <div id="modalUploader" class="meta-value" style="font-weight: 700; color: var(--t-hi); font-size: 1.1rem;"></div>
+                                <div class="meta-label"
+                                    style="font-size: 0.8rem; color: var(--t-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
+                                    Shared by</div>
+                                <div id="modalUploader" class="meta-value"
+                                    style="font-weight: 700; color: var(--t-hi); font-size: 1.1rem;"></div>
                             </div>
                         </div>
                     </div>

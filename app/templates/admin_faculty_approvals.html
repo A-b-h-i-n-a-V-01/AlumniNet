@@ -19,6 +19,7 @@
                 <thead>
                     <tr class="text-muted small">
                         <th>User</th>
+                        <th>Faculty ID</th>
                         <th>Department</th>
                         <th>Actions</th>
                     </tr>
@@ -30,12 +31,13 @@
                             <div class="d-flex align-items-center">
                                 <img src="https://ui-avatars.com/api/?name={{ profile.user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="36" height="36">
                                 <div>
-                                    <div class="fw-bold text-white">{{ profile.user.username }}</div>
+                                    <div class="fw-bold text-hi">{{ profile.user.username }}</div>
                                     <div class="text-muted small">{{ profile.user.email }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="text-white">{{ profile.department }}</td>
+                        <td><span class="text-hi fw-bold">{{ profile.faculty_id or 'NOT PROVIDED' }}</span></td>
+                        <td class="text-hi">{{ profile.department }}</td>
                         <td>
                             <div class="d-flex gap-2">
                                 <a href="{{ url_for('approve_faculty', profile_id=profile.id) }}" class="btn btn-sm btn-success px-3">
@@ -90,18 +92,18 @@
                             <div class="d-flex align-items-center">
                                 <img src="{{ url_for('static', filename='profile_pics/' + profile.user.image_file) if profile.user.image_file else 'https://ui-avatars.com/api/?name=' + profile.user.username + '&background=4c1d95&color=c4b5fd' }}" class="rounded-circle me-3" width="36" height="36" style="object-fit:cover;">
                                 <div>
-                                    <div class="fw-bold text-white">{{ profile.user.username }}</div>
+                                    <div class="fw-bold text-hi">{{ profile.user.username }}</div>
                                     <div class="text-muted smaller">Batch {{ profile.graduation_year }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="text-white small">{{ profile.degree }}</div>
+                            <div class="text-hi small">{{ profile.degree }}</div>
                             <div class="text-muted smaller">{{ profile.current_company or 'No company listed' }}</div>
                         </td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a href="{{ url_for('approve_alumni', profile_id=profile.id) }}" class="btn btn-sm btn-info text-white px-3" onclick="event.stopPropagation();">
+                                <a href="{{ url_for('approve_alumni', profile_id=profile.id) }}" class="btn btn-sm btn-info text-hi px-3" onclick="event.stopPropagation();">
                                     <i class="fas fa-id-card me-1"></i> Verify
                                 </a>
                             </div>
@@ -118,3 +120,4 @@
     </div>
 </div>
 {% endblock %}
+

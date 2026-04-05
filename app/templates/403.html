@@ -2,7 +2,7 @@
 {% block content %}
 <div class="row justify-content-center align-items-center fade-in-up" style="min-height: 80vh;">
     <div class="col-lg-6 text-center">
-        <div class="dash-card p-5" style="background: rgba(14, 17, 32, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);">
+        <div class="dash-card p-5" style="backdrop-filter: blur(25px); border: 1px solid var(--c-border-hi); box-shadow: var(--sh-card);">
             <div class="error-icon mb-4">
                 <i class="fas fa-shield-alt" style="font-size: 5rem; color: #ef4444; filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));"></i>
             </div>
@@ -27,9 +27,11 @@
     .fw-900 { font-weight: 900; }
     .fw-700 { font-weight: 700; }
     .gradient-text {
-        background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+        background: var(--grad-text);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 </style>
 {% endblock %}
+

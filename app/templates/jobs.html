@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="fade-in-up">
-    <div class="d-flex justify-content-between align-items-end mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-5" data-reveal="fade-down">
         <div>
             <h2 style="font-family:'Syne', sans-serif; font-weight:800; letter-spacing:-.03em; background:var(--grad-text); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-size:2.5rem; margin-bottom:8px;">Career Opportunities</h2>
             <p style="color:var(--t-muted); font-size:1.05rem;">Exclusive openings from our global alumni network.</p>
@@ -16,7 +16,7 @@
 
     <div class="row g-4">
         {% for job in jobs %}
-        <div class="col-md-6 col-lg-4">
+        <div class="col-md-6 col-lg-4" data-reveal="fade-up">
             <div class="dash-card h-100 d-flex flex-column job-card-clickable" 
                  style="padding:24px;"
                  data-title="{{ job.title }}"
@@ -26,6 +26,7 @@
                  data-description="{{ job.description }}"
                  data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
                  data-posted-by="{{ job.author.user.username }}"
+                 data-deadline="{{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else '' }}"
                  data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                  onclick="viewJobDetails(this)">
                 

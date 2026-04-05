@@ -2,7 +2,7 @@
 {% block content %}
 <div class="row justify-content-center fade-in-up">
     <div class="col-lg-7">
-        <div class="content-header mb-4">
+        <div class="content-header mb-4" data-reveal="fade-down">
             <h1 class="display-heading mb-1 gradient-text" style="font-size: 2.5rem;">My Profile</h1>
         </div>
         <div class="dash-card">
@@ -23,7 +23,8 @@
                 </div>
                 <h4 style="color:var(--t-hi); font-family:'Syne',sans-serif; letter-spacing:-.03em; margin-bottom:8px;">
                     {{ current_user.username }}
-                    {% if current_user.role == 'alumni' and current_user.alumni_profile and current_user.alumni_profile.is_approved == 'Approved' %}
+                    {% if current_user.role == 'alumni' and current_user.alumni_profile and
+                    current_user.alumni_profile.is_approved == 'Approved' %}
                     <i class="fas fa-check-circle verified-badge" title="Verified Alumni"></i>
                     {% endif %}
                 </h4>
@@ -39,7 +40,7 @@
 
                 {% if current_user.role == 'alumni' %}
                 <div class="d-inline-block px-4 py-2 rounded-pill mb-2"
-                    style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">
+                    style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fas fa-bolt text-warning"></i>
                         <span
@@ -50,276 +51,277 @@
                     </div>
                 </div>
                 {% endif %}
+
+                <div class="mt-3">
+                    <button class="btn btn-primary-custom btn-sm px-4" onclick="toggleEditMode()" id="edit-profile-btn">
+                        <i class="fas fa-user-edit me-2"></i> Edit Profile
+                    </button>
+                </div>
             </div>
 
             <div style="height:1px; background:var(--c-border); margin-bottom:28px;"></div>
 
-            {% if form %}
-            <form method="POST" enctype="multipart/form-data">
-                {{ form.hidden_tag() }}
+            {# --- VIEW MODE --- #}
+            <div id="profile-view-mode">
+                <div class="row g-4 text-start">
+                    {# Basic Bio Information #}
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Email Address</label>
+                        <div class="text-hi">{{ current_user.email }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Department</label>
+                        <div class="text-hi">
+                            {% if current_user.role == 'alumni' and current_user.alumni_profile %}{{
+                            current_user.alumni_profile.department or 'N/A' }}
+                            {% elif current_user.role == 'student' and current_user.student_profile %}{{
+                            current_user.student_profile.department or 'N/A' }}
+                            {% elif current_user.role == 'faculty' and current_user.faculty_profile %}{{
+                            current_user.faculty_profile.department or 'N/A' }}{% else %}N/A{% endif %}
+                        </div>
+                    </div>
 
-                <div class="mb-4 text-start">
-                    {{ form.picture.label(class="form-label") }}
-                    {{ form.picture(class="form-control mb-1", style="background:#fff!important; color:#000!important;")
-                    }}
-                    {% if form.picture.errors %}
-                    {% for error in form.picture.errors %}<span class="text-danger small">{{ error }}</span><br>{%
-                    endfor %}
+                    {% if current_user.role == 'alumni' and current_user.alumni_profile %}
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Current Company</label>
+                        <div class="text-hi">{{ current_user.alumni_profile.current_company or 'Not specified' }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Current Position</label>
+                        <div class="text-hi">{{ current_user.alumni_profile.current_position or 'Not specified' }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Admission Year</label>
+                        <div class="text-hi">{{ current_user.alumni_profile.enrollment_year or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Graduation Year</label>
+                        <div class="text-hi">{{ current_user.alumni_profile.graduation_year or 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Degree</label>
+                        <div class="text-hi">{{ current_user.alumni_profile.degree or 'N/A' }}</div>
+                    </div>
+                    {% if current_user.alumni_profile.linkedin_url %}
+                    <div class="col-md-12">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">LinkedIn</label>
+                        <div><a href="{{ current_user.alumni_profile.linkedin_url }}" target="_blank"
+                                class="text-primary-custom"><i class="fab fa-linkedin me-1"></i> View Profile</a></div>
+                    </div>
                     {% endif %}
-                </div>
-
-                {% if current_user.role == 'alumni' %}
-                <div class="mb-2"
-                    style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">
-                    Alumni Details</div>
-
-                <div class="mb-4 text-start">
-                    {{ form.resume.label(class="form-label") }}
-                    {{ form.resume(class="form-control mb-1", accept=".pdf", style="background:#fff!important; color:#000!important;") }}
-                    {% if form.resume.errors %}
-                        {% for error in form.resume.errors %}
-                            <span class="text-danger small">{{ error }}</span><br>
-                        {% endfor %}
-                    {% endif %}
-                    {% if current_user.alumni_profile and current_user.alumni_profile.resume_file %}
-                    <div class="mt-2">
+                    {% if current_user.alumni_profile.resume_file %}
+                    <div class="col-md-12 pt-2">
                         <a href="{{ url_for('static', filename='resumes/' + current_user.alumni_profile.resume_file) }}"
-                            target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-file-pdf me-1"></i> View Current Resume
+                            target="_blank" class="btn btn-sm btn-primary-custom w-100">
+                            <i class="fas fa-file-pdf me-1"></i> View My Resume
                         </a>
                     </div>
                     {% endif %}
-                </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        {{ form.enrollment_year.label(class="form-label") }}
-                        {% if form.enrollment_year.errors %}
-                        {{ form.enrollment_year(type="number", id="alumn_enroll_yr", **{'data-number-input': '', 'min':
-                        '1950', 'max': 3000|string}) }}
-                        <div class="invalid-feedback">{% for e in form.enrollment_year.errors %}<span>{{ e }}</span>{%
-                            endfor %}</div>
-                        {% else %}
-                        {{ form.enrollment_year(type="number", id="alumn_enroll_yr", **{'data-number-input': '', 'min':
-                        '1950', 'max': 3000|string}) }}
-                        {% endif %}
-                        <div class="form-text">Join Year</div>
-                    </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        {{ form.graduation_year.label(class="form-label") }}
-                        {% if form.graduation_year.errors %}
-                        {{ form.graduation_year(type="number", id="alumn_grad_yr", **{'data-number-input': '',
-                        'data-no-controls': '', 'readonly': True}) }}
-                        <div class="invalid-feedback">{% for e in form.graduation_year.errors %}<span>{{ e }}</span>{%
-                            endfor %}</div>
-                        {% else %}
-                        {{ form.graduation_year(type="number", id="alumn_grad_yr", **{'data-number-input': '',
-                        'data-no-controls': '', 'readonly': True}) }}
-                        {% endif %}
-                        <div class="form-text">Graduation Year</div>
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.degree.label(class="form-label") }}
-                        {% if form.degree.errors %}{{ form.degree(class="form-control is-invalid") }}<div
-                            class="invalid-feedback">{% for e in form.degree.errors %}<span>{{ e }}</span>{% endfor %}
+                    {% elif current_user.role == 'student' and current_user.student_profile %}
+                    <div class="col-md-12">
+                        <div class="p-3 rounded mb-3"
+                            style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
+                            <div class="small text-muted text-uppercase fw-bold mb-1">Current Year</div>
+                            <div class="text-a1 fw-bold fs-5">{{ current_user.student_profile.current_year_str or '1st
+                                Year' }}</div>
                         </div>
-                        {% else %}{{ form.degree(class="form-control") }}{% endif %}
-                    </div>
-                </div>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const enrollInput = document.getElementById('alumn_enroll_yr');
-                        const gradInput = document.getElementById('alumn_grad_yr');
-
-                        if (enrollInput && gradInput) {
-                            enrollInput.addEventListener('change', function () {
-                                const newYear = parseInt(enrollInput.value) + 4;
-                                if (!isNaN(newYear)) {
-                                    gradInput.value = newYear;
-                                    gradInput.dispatchEvent(new Event('valueUpdate'));
-                                }
-                            });
-                        }
-                    });
-                </script>
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        {{ form.department.label(class="form-label") }}
-                        {% if form.department.errors %}{{ form.department(class="form-select is-invalid",
-                        id="dept_select") }}<div class="invalid-feedback">{% for e in form.department.errors %}<span>{{
-                                e }}</span>{% endfor
-                            %}</div>
-                        {% else %}{{ form.department(class="form-select", id="dept_select") }}{% endif %}
-                    </div>
-                </div>
-
-                <!-- Other Department Input (Hidden by default) -->
-                <div class="row mb-3" id="other_dept_container" style="display: none;">
-                    <div class="col-md-12">
-                        <label class="form-label">Specify Department</label>
-                        <input type="text" id="other_dept_input" class="form-control"
-                            placeholder="Enter your department name">
-                    </div>
-                </div>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const deptSelect = document.getElementById('dept_select');
-                        const otherContainer = document.getElementById('other_dept_container');
-                        const otherInput = document.getElementById('other_dept_input');
-                        const form = deptSelect.closest('form');
-
-                        function toggleOther() {
-                            if (deptSelect.value === 'Other') {
-                                otherContainer.style.display = 'block';
-                            } else {
-                                otherContainer.style.display = 'none';
-                            }
-                        }
-
-                        deptSelect.addEventListener('change', toggleOther);
-                        toggleOther(); // Initial check
-
-                        // Before form submission, if 'Other' is selected, update the select's inner value 
-                        // or handle it in the backend. To be safe, we'll use a hidden approach or 
-                        // just let the backend handle the 'other_dept_input' value.
-                        form.addEventListener('submit', function () {
-                            if (deptSelect.value === 'Other' && otherInput.value.trim() !== '') {
-                                // We'll handle this in the backend by looking for 'other_department' in request.form
-                                // but we need to ensure the input has a name attribute.
-                                otherInput.setAttribute('name', 'other_department_manual');
-                            }
-                        });
-                    });
-                </script>
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        {{ form.current_company.label(class="form-label") }}
-                        {% if form.current_company.errors %}{{ form.current_company(class="form-control is-invalid") }}
-                        <div class="invalid-feedback">{% for e in form.current_company.errors %}<span>{{ e }}</span>{%
-                            endfor %}</div>
-                        {% else %}{{ form.current_company(class="form-control") }}{% endif %}
                     </div>
                     <div class="col-md-6">
-                        {{ form.current_position.label(class="form-label") }}
-                        {% if form.current_position.errors %}{{ form.current_position(class="form-control is-invalid")
-                        }}<div class="invalid-feedback">{% for e in form.current_position.errors %}<span>{{ e
-                                }}</span>{% endfor %}</div>
-                        {% else %}{{ form.current_position(class="form-control") }}{% endif %}
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Admission Year</label>
+                        <div class="text-hi">{{ current_user.student_profile.enrollment_year or 'N/A' }}</div>
                     </div>
+                    <div class="col-md-6">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Expected Graduation</label>
+                        <div class="text-hi">{{ current_user.student_profile.expected_graduation_year or 'N/A' }}
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">CGPA</label>
+                        <div class="text-hi">{{ current_user.student_profile.cgpa or '0.0' }}</div>
+                    </div>
+                    {% elif current_user.role == 'faculty' and current_user.faculty_profile %}
+                    <div class="col-md-12">
+                        <label class="small text-muted text-uppercase fw-bold mb-1">Faculty ID</label>
+                        <div class="text-hi">{{ current_user.faculty_profile.faculty_id or 'Not provided' }}</div>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="mb-4">
-                    {{ form.linkedin_url.label(class="form-label") }}
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
-                        {% if form.linkedin_url.errors %}{{ form.linkedin_url(class="form-control is-invalid") }}<div
-                            class="invalid-feedback">{% for e in form.linkedin_url.errors %}<span>{{ e }}</span>{%
-                            endfor %}</div>
-                        {% else %}{{ form.linkedin_url(class="form-control") }}{% endif %}
-                    </div>
+            </div>
+
+            {# --- EDIT MODE --- #}
+            <div id="profile-edit-mode" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 text-hi">Edit Your Details</h5>
+                    <button class="btn btn-sm btn-link text-muted" onclick="toggleEditMode()">Cancel</button>
                 </div>
 
-                {% elif current_user.role == 'student' %}
-                <div class="mb-2"
-                    style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">
-                    Student Details</div>
-                <div class="row mb-3">
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        {{ form.enrollment_year.label(class="form-label") }}
-                        {% if form.enrollment_year.errors %}
-                        {{ form.enrollment_year(type="number", id="enroll_yr", **{'data-number-input': '', 'min':
-                        '2010', 'max': 3000|string}) }}
-                        <div class="invalid-feedback">{% for e in form.enrollment_year.errors %}<span>{{ e }}</span>{%
-                            endfor %}</div>
-                        {% else %}
-                        {{ form.enrollment_year(type="number", id="enroll_yr", **{'data-number-input': '', 'min':
-                        '2010', 'max': 3000|string}) }}
+                {% if form %}
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-4 text-start">
+                        {{ form.picture.label(class="form-label") }}
+                        {{ form.picture(class="form-control mb-1", style="background:#fff!important;
+                        color:#000!important;") }}
+                        {% if form.picture.errors %}
+                        {% for error in form.picture.errors %}<span class="text-danger small">{{ error }}</span><br>{%
+                        endfor %}
                         {% endif %}
-                        <div class="form-text">Admission Year</div>
                     </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        {{ form.expected_graduation_year.label(class="form-label") }}
-                        {% if form.expected_graduation_year.errors %}
-                        {{ form.expected_graduation_year(type="number", id="grad_yr", **{'data-number-input': '',
-                        'data-no-controls': '', 'readonly': True}) }}
-                        <div class="invalid-feedback">{% for e in form.expected_graduation_year.errors %}<span>{{ e
-                                }}</span>{% endfor %}</div>
-                        {% else %}
-                        {{ form.expected_graduation_year(type="number", id="grad_yr", **{'data-number-input': '',
-                        'data-no-controls': '', 'readonly': True}) }}
+
+                    {% if current_user.role == 'alumni' %}
+                    <div class="mb-2"
+                        style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">
+                        Alumni Details</div>
+
+                    <div class="mb-4 text-start">
+                        {{ form.resume.label(class="form-label") }}
+                        {{ form.resume(class="form-control mb-1", accept=".pdf", style="background:#fff!important;
+                        color:#000!important;") }}
+                        {% if current_user.alumni_profile and current_user.alumni_profile.resume_file %}
+                        <div class="mt-2">
+                            <a href="{{ url_for('static', filename='resumes/' + current_user.alumni_profile.resume_file) }}"
+                                target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-file-pdf me-1"></i> View Current Resume
+                            </a>
+                        </div>
                         {% endif %}
-                        <div class="form-text">Graduation Year</div>
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ form.enrollment_year.label(class="form-label") }}
+                            {{ form.enrollment_year(type="number", id="alumn_enroll_yr", **{'data-number-input': '',
+                            'min': '1950', 'max': '3000'}) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.graduation_year.label(class="form-label") }}
+                            {{ form.graduation_year(type="number", id="alumn_grad_yr", **{'data-number-input': '',
+                            'data-no-controls': '', 'readonly': True}) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            {{ form.degree.label(class="form-label") }}
+                            {{ form.degree(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-select", id="dept_select") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ form.current_company.label(class="form-label") }}
+                            {{ form.current_company(class="form-control") }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.current_position.label(class="form-label") }}
+                            {{ form.current_position(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        {{ form.linkedin_url.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fab fa-linkedin"></i></span>
+                            {{ form.linkedin_url(class="form-control") }}
+                        </div>
+                    </div>
+
+                    {% elif current_user.role == 'student' %}
+                    <div class="mb-4 d-flex align-items-center justify-content-between p-3 rounded"
+                        style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
+                        <div>
+                            <div
+                                style="color:var(--t-muted); font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em;">
+                                Academic Status</div>
+                            <div style="color:var(--a1); font-weight:800; font-family:'Syne',sans-serif;">{{
+                                current_user.student_profile.current_year_str }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ form.enrollment_year.label(class="form-label") }}
+                            {{ form.enrollment_year(type="number", id="enroll_yr", **{'data-number-input': '', 'min':
+                            '2010', 'max': '3000'}) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.expected_graduation_year.label(class="form-label") }}
+                            {{ form.expected_graduation_year(type="number", id="grad_yr", **{'data-number-input': '',
+                            'data-no-controls': '', 'readonly': True}) }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            {{ form.department.label(class="form-label") }}
+                            {{ form.department(class="form-select") }}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        {{ form.cgpa.label(class="form-label") }}
+                        {% if form.cgpa.errors %}
+                        {{ form.cgpa(class="form-control is-invalid", type="number", min="1.0", max="10.0", step="0.1")
+                        }}
+                        <div class="invalid-feedback">
+                            {% for e in form.cgpa.errors %}<span>{{ e }}</span>{% endfor %}
+                        </div>
+                        {% else %}
+                        {{ form.cgpa(class="form-control", type="number", min="1.0", max="10.0", step="0.1") }}
+                        {% endif %}
+                    </div>
+
+                    {% elif current_user.role == 'faculty' %}
+                    <div class="mb-3">
+                        {{ form.faculty_id.label(class="form-label") }}
+                        {% if form.faculty_id.errors %}
+                        {{ form.faculty_id(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.faculty_id.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        {{ form.faculty_id(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="mb-4">
                         {{ form.department.label(class="form-label") }}
-                        {% if form.department.errors %}{{ form.department(class="form-select is-invalid") }}<div
-                            class="invalid-feedback">{% for e in form.department.errors %}<span>{{ e }}</span>{% endfor
-                            %}</div>
-                        {% else %}{{ form.department(class="form-select") }}{% endif %}
+                        {{ form.department(class="form-control") }}
                     </div>
-                </div>
+                    {% endif %}
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const enrollInput = document.getElementById('enroll_yr');
-                        const gradInput = document.getElementById('grad_yr');
-
-                        if (enrollInput && gradInput) {
-                            // Listen for the custom "input" or "change" event dispatched by number-input.js
-                            enrollInput.addEventListener('change', function () {
-                                const newYear = parseInt(enrollInput.value) + 4;
-                                if (!isNaN(newYear)) {
-                                    gradInput.value = newYear;
-                                    // Trigger its own update event so the display knows to roll
-                                    gradInput.dispatchEvent(new Event('valueUpdate'));
-                                }
-                            });
-                        }
-                    });
-                </script>
-                <div class="mb-4">
-                    {{ form.cgpa.label(class="form-label") }}
-                    {% if form.cgpa.errors %}{{ form.cgpa(class="form-control is-invalid") }}<div
-                        class="invalid-feedback">{% for e in form.cgpa.errors %}<span>{{ e }}</span>{% endfor %}</div>
-                    {% else %}{{ form.cgpa(class="form-control") }}{% endif %}
-                </div>
-                {% elif current_user.role == 'faculty' %}
-                <div class="mb-2"
-                    style="color:#a78bfa; font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; margin-bottom:16px;">
-                    Faculty Details</div>
-                <div class="mb-4">
-                    {{ form.department.label(class="form-label") }}
-                    {% if form.department.errors %}{{ form.department(class="form-select is-invalid") }}<div
-                        class="invalid-feedback">{% for e in form.department.errors %}<span>{{ e }}</span>{% endfor %}
+                    <div class="mt-4 mb-3">
+                        {{ form.submit(class="btn btn-primary-custom w-100 py-3") }}
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2"
+                            onclick="toggleEditMode()">Cancel</button>
                     </div>
-                    {% else %}{{ form.department(class="form-select") }}{% endif %}
-                </div>
+                </form>
+                {% else %}
+                <div class="alert alert-info">Admin profiles are managed via the database configuration.</div>
                 {% endif %}
-
-                <div class="d-grid mt-4">
-                    {{ form.submit(class="btn btn-primary-custom", style="justify-content:center;") }}
-                </div>
-            </form>
-            {% else %}
-            <div class="alert alert-info">Admin profiles are managed via the database configuration.</div>
-            {% endif %}
+            </div>
         </div>
 
         {# Alumni Specific: My Posted Jobs #}
         {% if current_user.role == 'alumni' %}
         <div class="glass-card mt-4 mb-5 p-4" style="border-radius: var(--r-lg);">
             <div class="d-flex justify-content-between align-items-center mb-4 pb-2"
-                style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                style="border-bottom: 1px solid var(--c-border);">
                 <h5
                     style="color:var(--t-hi); font-family:'Syne', sans-serif; font-weight:800; margin:0; letter-spacing:-.02em;">
                     <i class="fas fa-briefcase me-2" style="color:var(--a1);"></i>My Posted Jobs
                 </h5>
                 <div class="d-flex gap-2">
-                    <a href="{{ url_for('upload_event_photo', category='job_poster') }}" class="btn btn-outline-primary btn-sm px-3"
-                        style="font-size: 0.75rem; font-weight: 700; border-radius: 50px;">
-                        <i class="fas fa-camera me-1"></i> UPLOAD FLYER
-                    </a>
                     <a href="{{ url_for('new_job') }}" class="btn btn-primary-custom btn-sm px-3"
                         style="font-size: 0.75rem; font-weight: 700;">
                         <i class="fas fa-plus me-1"></i> POST JOB
@@ -330,39 +332,38 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
-                        <tr style="border-bottom: 2px solid rgba(255,255,255,0.05);">
+                        <tr style="border-bottom: 2px solid var(--c-border);">
                             <th class="ps-0 py-3"
-                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
                                 Job Title</th>
                             <th class="py-3"
-                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
                                 Company</th>
                             <th class="py-3"
-                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
-                                Date</th>
+                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
+                                Deadline</th>
                             <th class="text-end pe-0 py-3"
-                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">
+                                style="color:var(--t-muted); font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
                                 Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for job in jobs %}
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.3s ease;">
+                        <tr style="border-bottom: 1px solid var(--c-border); transition: background 0.3s ease;">
                             <td class="ps-0 py-3">
                                 <div class="fw-bold" style="color:var(--t-hi); font-size: 0.9rem;">{{ job.title }}</div>
                                 <div style="color:var(--t-muted); font-size: 0.75rem;">{{ job.location }}</div>
                             </td>
                             <td style="color:var(--t-base); font-size: 0.85rem;">{{ job.company }}</td>
-                            <td style="color:var(--t-muted); font-size: 0.8rem;">{{ job.date_posted.strftime('%d %b %Y')
-                                }}</td>
+                            <td style="color:var(--t-muted); font-size: 0.8rem; font-weight: 700; color: var(--a1);">
+                                {{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else 'No
+                                Deadline' }}
+                            </td>
                             <td class="text-end pe-0">
-                                {% if job.is_approved %}
                                 <span class="badge"
-                                    style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-size: 0.65rem; font-weight: 800; padding: 4px 8px;">LIVE</span>
-                                {% else %}
-                                <span class="badge"
-                                    style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); font-size: 0.65rem; font-weight: 800; padding: 4px 8px;">PENDING</span>
-                                {% endif %}
+                                    style="background: rgba({% if job.is_approved %}16, 185, 129{% else %}245, 158, 11{% endif %}, 0.1); color: {% if job.is_approved %}#10b981{% else %}#f59e0b{% endif %}; border: 1px solid rgba({% if job.is_approved %}16,185,129{% else %}245,158,11{% endif %},0.2); font-size: 0.65rem;">
+                                    {{ 'LIVE' if job.is_approved else 'PENDING' }}
+                                </span>
                             </td>
                         </tr>
                         {% endfor %}
@@ -370,14 +371,72 @@
                 </table>
             </div>
             {% else %}
-            <div class="text-center py-5"
-                style="background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
-                <i class="fas fa-history fa-2x mb-3 d-block" style="opacity: 0.2;"></i>
-                <p style="color:var(--t-muted); margin:0; font-size: 0.9rem;">You haven't posted any jobs yet.</p>
+            <div class="text-center py-5" style="border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px;">
+                <p style="color:var(--t-muted); margin:0;">You haven't posted any jobs yet.</p>
             </div>
             {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
+
+<script>
+    function toggleEditMode() {
+        const viewMode = document.getElementById('profile-view-mode');
+        const editMode = document.getElementById('profile-edit-mode');
+        if (editMode.classList.contains('d-none')) {
+            editMode.classList.remove('d-none');
+            viewMode.classList.add('d-none');
+        } else {
+            editMode.classList.add('d-none');
+            viewMode.classList.remove('d-none');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let alumniTimer, studentTimer;
+
+        // Auto-calculate graduation year (Alumni)
+        const aEnroll = document.getElementById('alumn_enroll_yr');
+        const aGrad = document.getElementById('alumn_grad_yr');
+        if (aEnroll && aGrad) {
+            const updateAlumniGrad = () => {
+                clearTimeout(alumniTimer);
+                alumniTimer = setTimeout(() => {
+                    const val = parseInt(aEnroll.value);
+                    if (!isNaN(val)) {
+                        const newVal = val + 4;
+                        if (parseInt(aGrad.value) !== newVal) {
+                            aGrad.value = newVal;
+                            aGrad.dispatchEvent(new Event('valueUpdate'));
+                        }
+                    }
+                }, 150);
+            };
+            aEnroll.addEventListener('input', updateAlumniGrad);
+            aEnroll.addEventListener('change', updateAlumniGrad);
+        }
+
+        // Auto-calculate graduation year (Student)
+        const sEnroll = document.getElementById('enroll_yr');
+        const sGrad = document.getElementById('grad_yr');
+        if (sEnroll && sGrad) {
+            const updateStudentGrad = () => {
+                clearTimeout(studentTimer);
+                studentTimer = setTimeout(() => {
+                    const val = parseInt(sEnroll.value);
+                    if (!isNaN(val)) {
+                        const newVal = val + 4;
+                        if (parseInt(sGrad.value) !== newVal) {
+                            sGrad.value = newVal;
+                            sGrad.dispatchEvent(new Event('valueUpdate'));
+                        }
+                    }
+                }, 150);
+            };
+            sEnroll.addEventListener('input', updateStudentGrad);
+            sEnroll.addEventListener('change', updateStudentGrad);
+        }
+    });
+</script>
 {% endblock %}

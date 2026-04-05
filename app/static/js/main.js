@@ -231,36 +231,44 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 })();
 
-// ─── TELEGRAM-STYLE DARK / LIGHT MODE TOGGLE ───────────────
+// ─── TELEGRAM-STYLE DARK / LIGHT MODE TOGGLE (ORIGIN-BASED) ──
 // On click: captures button position → switches data-theme on <html>
-// → animates a clip-path circle that grows from the button outward,
-// revealing the new theme underneath — identical to Telegram's animation.
+// → animates a smooth circular ripple originating from the clicked icon.
 (function () {
   'use strict';
 
-  // Inject the clip-path animation stylesheet for View Transitions
+  // Inject the refined ripple animation stylesheet
   const vt = document.createElement('style');
   vt.textContent = `
-    /* When theme transition runs via View Transitions API */
+    /* Disable default box-shadows/blends that cause jank during transition */
     ::view-transition-old(root),
     ::view-transition-new(root) {
       animation: none;
       mix-blend-mode: normal;
     }
-    /* New theme expands as a circle from toggle button */
+
+    /* The new theme reveals via a smooth circular ripple from the icon */
     ::view-transition-new(root) {
       z-index: 9999;
-      clip-path: var(--theme-ripple-clip, circle(0px at 50% 50%));
-      animation: _theme_ripple 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%));
+      animation: theme-ripple 0.95s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
       will-change: clip-path;
     }
+
     ::view-transition-old(root) {
-      z-index: 9998;
-      animation: none;
+      z-index: 1;
     }
-    @keyframes _theme_ripple {
-      from { clip-path: var(--theme-ripple-from, circle(0px at 50% 50%)); }
-      to   { clip-path: var(--theme-ripple-to,   circle(100% at 50% 50%)); }
+
+    @keyframes theme-ripple {
+      from { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
+      to   { clip-path: circle(var(--theme-r, 100%) at var(--theme-x, 50%) var(--theme-y, 50%)); }
+    }
+
+    /* Optimization: Temporarily disable heavy effects during transition to maintain 60fps */
+    .theme-transitioning, 
+    .theme-transitioning * {
+      backdrop-filter: none !important;
+      transition: none !important;
     }
   `;
   document.head.appendChild(vt);
@@ -270,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('theme', theme);
   }
 
-  function toggleTheme(btn) {
+  async function toggleTheme(btn) {
     const current  = document.documentElement.getAttribute('data-theme') || 'dark';
     const next     = current === 'dark' ? 'light' : 'dark';
 
@@ -285,35 +293,111 @@ document.addEventListener('DOMContentLoaded', function () {
         Math.max(y, window.innerHeight - y)
     );
 
-    const from = `circle(0px at ${x}px ${y}px)`;
-    const to   = `circle(${Math.ceil(endRadius)}px at ${x}px ${y}px)`;
-
     // Set CSS vars used by the @keyframes above
-    document.documentElement.style.setProperty('--theme-ripple-from', from);
-    document.documentElement.style.setProperty('--theme-ripple-to',   to);
+    document.documentElement.style.setProperty('--theme-x', `${x}px`);
+    document.documentElement.style.setProperty('--theme-y', `${y}px`);
+    document.documentElement.style.setProperty('--theme-r', `${Math.ceil(endRadius)}px`);
+    document.documentElement.style.setProperty('--theme-r-num', Math.ceil(endRadius));
 
     // Native View Transitions API (Chrome 111+, Firefox 126+)
     if (document.startViewTransition) {
-      document.startViewTransition(() => { applyTheme(next); });
+      document.documentElement.classList.add('theme-transitioning');
+      
+      const transition = document.startViewTransition(() => {
+        applyTheme(next);
+      });
+
+      try {
+        await transition.finished;
+      } finally {
+        document.documentElement.classList.remove('theme-transitioning');
+      }
     } else {
       applyTheme(next);
     }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    // Sync label text after DOM ready
-    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-
-    // Support #theme-toggle, .auth-theme-toggle, and .nav-theme-toggle buttons
     const btns = document.querySelectorAll('#theme-toggle, .auth-theme-toggle, .nav-theme-toggle');
     btns.forEach(btn => {
       btn.addEventListener('click', () => toggleTheme(btn));
     });
   });
 })();
+// ─── PREMIUM SCROLL REVEAL & PARALLAX ENGINE (V2.0) ─────────
+(function () {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // ── 1. Reveal Elements with Intersection Observer ──
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          
+          // If this is a group, stagger its direct children
+          if (entry.target.classList.contains('reveal-group')) {
+            const children = entry.target.children;
+            Array.from(children).forEach((child, i) => {
+              child.style.setProperty('--reveal-delay', `${(i + 1) * 0.12}s`);
+              child.classList.add('revealed');
+            });
+          }
+        } else {
+          // Re-triggering magic: remove class when out of view
+          entry.target.classList.remove('revealed');
+          if (entry.target.classList.contains('reveal-group')) {
+            Array.from(entry.target.children).forEach(child => {
+              child.classList.remove('revealed');
+            });
+          }
+        }
+      });
+    }, {
+      threshold: 0.1, // Reduced slightly for better sensitivity
+      rootMargin: '10px 0px -40px 0px'
+    });
+
+    // Observe all [data-reveal] elements
+    const elements = document.querySelectorAll('[data-reveal]');
+    elements.forEach(el => revealObserver.observe(el));
+
+    // ── 2. Ultimate Smooth Parallax ──
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    function upgradeParallax() {
+      const parallaxElements = document.querySelectorAll('.parallax-bg');
+      if (!parallaxElements.length) return;
+
+      parallaxElements.forEach(el => {
+        const speed = 0.25;
+        // Move image upwards while scrolling down (negative translateY)
+        const offset = lastScrollY * -speed;
+        el.style.setProperty('--scrolled-px', `${offset}px`);
+      });
+
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+      lastScrollY = window.scrollY;
+      if (!ticking) {
+        requestAnimationFrame(upgradeParallax);
+        ticking = true;
+      }
+    }, { passive: true });
+    
+    // Initial call
+    upgradeParallax();
+  });
+})();
+
+// Original code below
 // ─── RESPONSIVE SIDEBAR TOGGLE ─────────────────────────────
 (function () {
   'use strict';
+// ... rest of the file
 
   document.addEventListener('DOMContentLoaded', function () {
     const toggle = document.getElementById('sidebarToggle');

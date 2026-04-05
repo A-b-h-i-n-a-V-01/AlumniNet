@@ -63,11 +63,13 @@ class StudentProfile(db.Model):
     enrollment_year = db.Column(db.Integer, nullable=False)
     expected_graduation_year = db.Column(db.Integer)
     department = db.Column(db.String(100), nullable=False)
+    current_year_str = db.Column(db.String(20), default='1st Year')
     cgpa = db.Column(db.Float)
 
 class FacultyProfile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    faculty_id = db.Column(db.String(50), unique=True, nullable=True) # Official Faculty ID for verification
     department = db.Column(db.String(100), default='General')
     is_approved = db.Column(db.Boolean, default=False)
 

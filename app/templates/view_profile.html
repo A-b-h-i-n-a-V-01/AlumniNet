@@ -65,15 +65,15 @@
                     <div class="row g-4">
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Degree</p>
-                            <h5 class="text-white">{{ user.alumni_profile.degree or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.alumni_profile.degree or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Graduation Year</p>
-                            <h5 class="text-white">{{ user.alumni_profile.graduation_year or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.alumni_profile.graduation_year or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Current Company</p>
-                            <h5 class="text-white">
+                            <h5 class="text-hi">
                                 {% if user.alumni_profile.current_company %}
                                 <i class="fas fa-building me-2 opacity-50"></i>{{ user.alumni_profile.current_company }}
                                 {% else %}N/A{% endif %}
@@ -81,37 +81,41 @@
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Position</p>
-                            <h5 class="text-white">{{ user.alumni_profile.current_position or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.alumni_profile.current_position or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Department</p>
-                            <h5 class="text-white">{{ user.alumni_profile.department or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.alumni_profile.department or 'N/A' }}</h5>
                         </div>
                     </div>
                 {% elif user.role == 'student' %}
                     <div class="row g-4">
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Department</p>
-                            <h5 class="text-white">{{ user.student_profile.department or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.student_profile.department or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Enrollment Year</p>
-                            <h5 class="text-white">{{ user.student_profile.enrollment_year or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.student_profile.enrollment_year or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Graduating Batch</p>
-                            <h5 class="text-white">{% if user.student_profile.enrollment_year %}{{ user.student_profile.enrollment_year + 4 }}{% else %}N/A{% endif %}</h5>
+                            <h5 class="text-hi">{% if user.student_profile.enrollment_year %}{{ user.student_profile.enrollment_year + 4 }}{% else %}N/A{% endif %}</h5>
                         </div>
                     </div>
                 {% elif user.role == 'faculty' %}
                     <div class="row g-4">
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Department</p>
-                            <h5 class="text-white">{{ user.faculty_profile.department or 'N/A' }}</h5>
+                            <h5 class="text-hi">{{ user.faculty_profile.department or 'N/A' }}</h5>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Faculty ID</p>
+                            <h5 class="text-hi">{{ user.faculty_profile.faculty_id or 'N/A' }}</h5>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-uppercase text-muted small fw-bold mb-1" style="letter-spacing: 0.1em;">Faculty Status</p>
-                            <h5 class="text-white">
+                            <h5 class="text-hi">
                                 {% if user.faculty_profile.is_approved %}
                                 <span class="text-success"><i class="fas fa-check-circle me-1"></i>Verified</span>
                                 {% else %}
@@ -123,7 +127,7 @@
                 {% elif user.role == 'admin' %}
                     <div class="text-center py-4">
                         <i class="fas fa-shield-alt fa-3x text-primary mb-3 opacity-50"></i>
-                        <h5 class="text-white">System Administrator</h5>
+                        <h5 class="text-hi">System Administrator</h5>
                         <p class="text-muted">Oversees platform operations and verifications.</p>
                     </div>
                 {% endif %}
@@ -134,21 +138,33 @@
             <div class="job-postings px-md-4">
                 <div class="d-flex align-items-center gap-2 mb-4">
                     <i class="fas fa-briefcase text-primary opacity-75"></i>
-                    <h5 class="text-white mb-0" style="font-family:'Syne',sans-serif; letter-spacing:-.02em;">Job Opportunities Shared</h5>
+                    <h5 class="text-hi mb-0" style="font-family:'Syne',sans-serif; letter-spacing:-.02em;">Job Opportunities Shared</h5>
                 </div>
                 
                 {% if jobs %}
                 <div class="row g-3">
                     {% for job in jobs %}
                     <div class="col-12">
-                        <div class="glass-card p-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--c-border);">
+                        <div class="glass-card p-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--c-border); cursor: pointer;"
+                             data-title="{{ job.title }}" data-company="{{ job.company }}" data-location="{{ job.location }}"
+                             data-type="{{ job.job_type if job.job_type else 'Full Time' }}"
+                             data-description="{{ job.description }}" data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
+                             data-posted-by="{{ job.author.user.username }}"
+                             data-deadline="{{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else '' }}"
+                             data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
+                             onclick="viewJobDetails(this)">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h6 class="text-white mb-1">{{ job.title }}</h6>
+                                    <h6 class="text-hi mb-1">{{ job.title }}</h6>
                                     <p class="text-muted small mb-0">
                                         <i class="fas fa-building me-1 opacity-50"></i>{{ job.company }} &bull; 
                                         <i class="fas fa-map-marker-alt me-1 opacity-50"></i>{{ job.location }}
                                     </p>
+                                    {% if job.application_deadline %}
+                                    <p class="text-danger small mb-0 mt-1" style="font-size: 0.7rem; font-weight: 700;">
+                                        <i class="fas fa-hourglass-end me-1"></i>Deadline: {{ job.application_deadline.strftime('%d/%m/%Y') }}
+                                    </p>
+                                    {% endif %}
                                 </div>
                                 <div class="text-end">
                                     <span class="badge bg-surface text-muted border-0 small px-0">
@@ -157,9 +173,9 @@
                                 </div>
                             </div>
                             <div class="mt-3 d-flex justify-content-between align-items-center">
-                                <a href="{{ job.apply_link }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill">
-                                    View Details <i class="fas fa-external-link-alt ms-1 small"></i>
-                                </a>
+                                <span class="btn btn-outline-primary btn-sm rounded-pill">
+                                    View Details <i class="fas fa-search ms-1 small"></i>
+                                </span>
                                 {% if not job.is_approved %}
                                 <span class="badge bg-warning small">Pending Approval</span>
                                 {% endif %}
@@ -189,3 +205,4 @@
     </div>
 </div>
 {% endblock %}
+

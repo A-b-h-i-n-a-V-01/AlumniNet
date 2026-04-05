@@ -18,7 +18,7 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small mb-1">
                             <span class="text-muted text-capitalize">{{ role }}s</span>
-                            <span class="text-white fw-bold">{{ count }}</span>
+                            <span class="text-hi fw-bold">{{ count }}</span>
                         </div>
                         <div class="progress" style="height: 12px !important; border-radius: 6px;">
                             {% set percent = (count / total_users * 100)|round|int if total_users > 0 else 0 %}
@@ -42,7 +42,7 @@
                         <div class="d-flex justify-content-between small mb-1">
                             <span class="text-muted">{{ 'Approved Activities' if approved else 'Pending Verification'
                                 }}</span>
-                            <span class="text-white fw-bold">{{ count }}</span>
+                            <span class="text-hi fw-bold">{{ count }}</span>
                         </div>
                         <div class="progress" style="height: 12px !important; border-radius: 6px;">
                             {% set percent = (count / total_jobs * 100)|round|int if total_jobs > 0 else 0 %}
@@ -63,12 +63,12 @@
                 <div class="row text-center py-4">
                     <div class="col-md-4 border-end border-secondary">
                         <div class="text-muted small text-uppercase mb-2">Growth Rate</div>
-                        <h2 class="text-white mb-0">+12%</h2>
+                        <h2 class="text-hi mb-0">+12%</h2>
                         <small class="text-success">Monthly average</small>
                     </div>
                     <div class="col-md-4 border-end border-secondary">
                         <div class="text-muted small text-uppercase mb-2">Engagement</div>
-                        <h2 class="text-white mb-0">High</h2>
+                        <h2 class="text-hi mb-0">High</h2>
                         <small class="text-info">Message volume active</small>
                     </div>
                     <div class="col-md-4">

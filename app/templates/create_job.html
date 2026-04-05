@@ -43,8 +43,9 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         {{ form.application_deadline.label(class="form-label") }}
-                        {% if form.application_deadline.errors %}{{ form.application_deadline(class="form-control is-invalid") }}<div class="invalid-feedback">{% for e in form.application_deadline.errors %}<span>{{ e }}</span>{% endfor %}</div>
-                        {% else %}{{ form.application_deadline(class="form-control", type="date") }}{% endif %}
+                        {% if form.application_deadline.errors %}{{ form.application_deadline(class="form-control is-invalid", placeholder="dd/mm/yyyy") }}<div class="invalid-feedback">{% for e in form.application_deadline.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                        {% else %}{{ form.application_deadline(class="form-control", placeholder="dd/mm/yyyy") }}{% endif %}
+                        <div class="form-text mt-1 text-muted small">Please enter in <span style="color:var(--primary); font-weight:700;">dd/mm/yyyy</span> format.</div>
                     </div>
                 </div>
                 <div class="mb-4">

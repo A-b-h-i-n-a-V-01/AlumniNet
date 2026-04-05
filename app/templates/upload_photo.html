@@ -13,12 +13,12 @@
             </p>
         </div>
 
-        <div class="dash-card p-4 p-md-5" style="border: 1px solid rgba(255,255,255,0.05); background: rgba(14, 17, 32, 0.4); backdrop-filter: blur(20px);">
+        <div class="dash-card p-4 p-md-5" style="border: 1px solid var(--c-border-hi); background: rgba(14, 17, 32, 0.4); backdrop-filter: blur(20px);">
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
                 
                 <div class="mb-5 text-center">
-                    <div id="imagePreview" style="width:100%; aspect-ratio:16/9; border-radius:var(--r); background:rgba(0,0,0,0.2); display:flex; align-items:center; justify-content:center; border:2px dashed rgba(255,255,255,0.1); overflow:hidden; transition: all 0.3s ease;">
+                    <div id="imagePreview" style="width:100%; aspect-ratio:16/9; border-radius:var(--r); background:rgba(0,0,0,0.2); display:flex; align-items:center; justify-content:center; border:2px dashed var(--c-border-hi); overflow:hidden; transition: all 0.3s ease;">
                         <div class="text-center">
                             <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: var(--a1); opacity:0.5;"></i>
                             <p class="mb-0 small" style="color: var(--t-muted);">Select a photo to preview</p>
@@ -51,7 +51,7 @@
                             {{ form.event_name(class="form-control is-invalid rounded-pill py-2 px-3") }}
                             <div class="invalid-feedback">{% for e in form.event_name.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                            {{ form.event_name(class="form-control rounded-pill py-2 px-3", placeholder="e.g. 2024 Winter Reunion", style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); color: #fff;") }}
+                            {{ form.event_name(class="form-control rounded-pill py-2 px-3", placeholder="e.g. 2024 Winter Reunion", style="background: rgba(255,255,255,0.02); border-color: var(--c-border-hi); color: #fff;") }}
                         {% endif %}
                     {% elif form.title %}
                         {{ form.title.label(class="form-label fw-700", style="color: var(--t-hi); font-size: 0.9rem;") }}
@@ -59,7 +59,7 @@
                             {{ form.title(class="form-control is-invalid rounded-pill py-2 px-3") }}
                             <div class="invalid-feedback">{% for e in form.title.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                            {{ form.title(class="form-control rounded-pill py-2 px-3", placeholder="e.g. Software Engineer Role", style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); color: #fff;") }}
+                            {{ form.title(class="form-control rounded-pill py-2 px-3", placeholder="e.g. Software Engineer Role", style="background: rgba(255,255,255,0.02); border-color: var(--c-border-hi); color: #fff;") }}
                         {% endif %}
                     {% endif %}
                 </div>
@@ -71,7 +71,7 @@
                             {{ form.caption(class="form-control is-invalid", rows=3, style="border-radius: 18px;") }}
                             <div class="invalid-feedback">{% for e in form.caption.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                            {{ form.caption(class="form-control", rows=3, placeholder="Tell us about this moment...", style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); color: #fff; border-radius: 18px; padding: 15px;") }}
+                            {{ form.caption(class="form-control", rows=3, placeholder="Tell us about this moment...", style="background: rgba(255,255,255,0.02); border-color: var(--c-border-hi); color: #fff; border-radius: 18px; padding: 15px;") }}
                         {% endif %}
                     {% elif form.description %}
                         {{ form.description.label(class="form-label fw-700", style="color: var(--t-hi); font-size: 0.9rem;") }}
@@ -79,7 +79,7 @@
                             {{ form.description(class="form-control is-invalid", rows=3, style="border-radius: 18px;") }}
                             <div class="invalid-feedback">{% for e in form.description.errors %}<span>{{ e }}</span>{% endfor %}</div>
                         {% else %}
-                            {{ form.description(class="form-control", rows=3, placeholder="Details about this opportunity...", style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); color: #fff; border-radius: 18px; padding: 15px;") }}
+                            {{ form.description(class="form-control", rows=3, placeholder="Details about this opportunity...", style="background: rgba(255,255,255,0.02); border-color: var(--c-border-hi); color: #fff; border-radius: 18px; padding: 15px;") }}
                         {% endif %}
                     {% endif %}
                 </div>
@@ -88,7 +88,7 @@
                     <button type="submit" class="btn btn-primary-custom flex-grow-1 py-3 fw-800 rounded-pill" style="letter-spacing: 0.02em;">
                         <i class="fas fa-paper-plane me-2"></i> {{ form.submit.label.text }}
                     </button>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary px-4 py-3 rounded-pill fw-700" style="border-color: rgba(255,255,255,0.1);">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary px-4 py-3 rounded-pill fw-700" style="border-color: var(--c-border-hi);">
                         Cancel
                     </a>
                 </div>
@@ -102,7 +102,7 @@
     .fw-800 { font-weight: 800; }
     .custom-file-control {
         background: rgba(255,255,255,0.02) !important;
-        border-color: rgba(255,255,255,0.05) !important;
+        border-color: var(--c-border-hi) !important;
         color: var(--t-muted) !important;
         border-radius: 50px !important;
         padding: 10px 20px !important;
@@ -132,3 +132,4 @@ function previewImage(input) {
 }
 </script>
 {% endblock %}
+

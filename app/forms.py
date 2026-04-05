@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, IntegerField, FloatField, DateField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
-from app.models import User
+from app.models import User, FacultyProfile
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
@@ -10,6 +10,29 @@ class RegistrationForm(FlaskForm):
     role = SelectField('Role', choices=[('student', 'Student'), ('alumni', 'Alumni'), ('faculty', 'Faculty')], validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    
+    # Role-specific fields (Optional here, validated conditionally in routes or made required in UI)
+    graduation_year = IntegerField('Graduation Year (For Alumni)', validators=[Optional()])
+    degree = StringField('Degree (For Alumni)', validators=[Optional()])
+    
+    enrollment_year = IntegerField('Enrollment Year (For Students)', validators=[Optional()])
+    current_year = SelectField('Current Year', choices=[
+        ('1st Year', '1st Year'),
+        ('2nd Year', '2nd Year'),
+        ('3rd Year', '3rd Year'),
+        ('4th Year', '4th Year'),
+    ], validators=[Optional()])
+    faculty_id = StringField('Faculty ID', validators=[Optional(), Length(max=50)])
+    department = SelectField('Department', choices=[
+        ('CSE', 'Computer Science'),
+        ('ECE', 'Electronics & Communication'),
+        ('ME', 'Mechanical Engineering'),
+        ('CE', 'Civil Engineering'),
+        ('EEE', 'Electrical & Electronics'),
+        ('MCA', 'Master of Computer Applications'),
+        ('MBA', 'Master of Business Administration'),
+    ], validators=[Optional()])
+    
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -27,6 +50,12 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('That email is taken. Please choose a different one.')
 
+    def validate_faculty_id(self, faculty_id):
+        if self.role.data == 'faculty' and faculty_id.data:
+            existing = FacultyProfile.query.filter_by(faculty_id=faculty_id.data).first()
+            if existing:
+                raise ValidationError('This Faculty ID is already registered. Please contact the administrator if this is an error.')
+
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -40,7 +69,7 @@ class JobPostForm(FlaskForm):
     job_type = SelectField('Job Type', choices=[('Internship', 'Internship'), ('Full-time', 'Full-time'), ('Part-time', 'Part-time')], validators=[DataRequired()])
     target_year = SelectField('Target Year', choices=[('All', 'All Students'), ('1st Year', '1st Year'), ('2nd Year', '2nd Year'), ('3rd Year', '3rd Year'), ('4th Year', '4th Year')], validators=[DataRequired()])
     apply_link = StringField('Application Link', validators=[DataRequired()])
-    application_deadline = DateField('Application Deadline', validators=[Optional()])
+    application_deadline = DateField('Application Deadline (dd/mm/yyyy)', format='%d/%m/%Y', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Post Job')
 
@@ -71,13 +100,22 @@ class StudentProfileForm(FlaskForm):
     enrollment_year = IntegerField('Enrollment Year', validators=[Optional(), NumberRange(min=1980, max=3000)])
     expected_graduation_year = IntegerField('Expected Graduation Year', validators=[Optional(), NumberRange(min=1980, max=3000)])
     department = StringField('Department', validators=[Optional()])
-    cgpa = FloatField('CGPA', validators=[Optional()])
+    cgpa = FloatField('CGPA', validators=[Optional(), NumberRange(min=1.0, max=10.0)])
     submit = SubmitField('Update Profile')
 
 class FacultyProfileForm(FlaskForm):
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    faculty_id = StringField('Faculty ID', validators=[DataRequired(), Length(max=50)])
     department = StringField('Department', validators=[DataRequired()])
     submit = SubmitField('Update Profile')
+
+    def validate_faculty_id(self, faculty_id):
+        # We need to access the current faculty profile to allow them to keep their own ID
+        from flask_login import current_user
+        if current_user.faculty_profile.faculty_id != faculty_id.data:
+            existing = FacultyProfile.query.filter_by(faculty_id=faculty_id.data).first()
+            if existing:
+                raise ValidationError('This Faculty ID is already taken by another user.')
 
 class EventPhotoForm(FlaskForm):
     photo = FileField('Upload Photo', validators=[DataRequired(), FileAllowed(['jpg', 'png'])])

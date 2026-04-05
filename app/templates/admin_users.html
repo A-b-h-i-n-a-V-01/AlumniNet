@@ -15,7 +15,7 @@
 
     <div class="dash-card">
         <div class="table-responsive">
-            <table class="table table-hover text-white align-middle" style="border-color: rgba(255,255,255,0.05);">
+            <table class="table table-hover text-hi align-middle" style="border-color: var(--c-border-hi);">
                 <thead>
                     <tr class="text-muted" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
                         <th>User</th>
@@ -32,7 +32,7 @@
                             <div class="d-flex align-items-center">
                                 <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="36" height="36">
                                 <div>
-                                    <div class="fw-bold text-white">{{ user.username }}</div>
+                                    <div class="fw-bold text-hi">{{ user.username }}</div>
                                     <div class="text-muted small">{{ user.email }}</div>
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                         <td>
                             {% if user.role == 'alumni' %}
                             <form action="{{ url_for('admin_update_points', user_id=user.id) }}" method="POST" class="d-flex align-items-center gap-2">
-                                <input type="number" name="points" value="{{ user.points }}" class="form-control form-control-sm bg-dark text-white border-secondary" style="width: 80px; font-size: 0.8rem; padding: 4px 8px !important;">
+                                <input type="number" name="points" value="{{ user.points }}" class="form-control form-control-sm bg-dark text-hi border-secondary" style="width: 80px; font-size: 0.8rem; padding: 4px 8px !important;">
                                 <button type="submit" class="btn btn-sm btn-outline-warning" title="Update Points" style="padding: 4px 8px !important;"><i class="fas fa-save"></i></button>
                             </form>
                             {% else %}
@@ -69,3 +69,4 @@
     </div>
 </div>
 {% endblock %}
+

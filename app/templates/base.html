@@ -9,7 +9,6 @@
         document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
         document.documentElement.classList.add('js-enabled');
     </script>
-    <style>html,body{background:#05060f!important;color:#cbd5e1;}</style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -46,6 +45,15 @@
                     <span class="nav-text">Dashboard</span>
                 </a>
             </li>
+            
+            {% if (current_user.role == 'faculty' and current_user.faculty_profile.is_approved) or current_user.role == 'admin' %}
+            <li>
+                <a href="{{ url_for('faculty_moderation') }}" class="nav-link {% if request.endpoint == 'faculty_moderation' %}active{% endif %}">
+                    <i class="fas fa-tasks"></i>
+                    <span class="nav-text">Moderation</span>
+                </a>
+            </li>
+            {% endif %}
             <li>
                 <a href="{{ url_for('search') }}" class="nav-link {% if request.endpoint == 'search' %}active{% endif %}">
                     <i class="fas fa-search"></i>
@@ -76,14 +84,6 @@
                 </a>
             </li>
             
-            {% if (current_user.role == 'faculty' and current_user.faculty_profile.is_approved) or current_user.role == 'admin' %}
-            <li>
-                <a href="{{ url_for('faculty_moderation') }}" class="nav-link {% if request.endpoint == 'faculty_moderation' %}active{% endif %}">
-                    <i class="fas fa-tasks"></i>
-                    <span class="nav-text">Moderation</span>
-                </a>
-            </li>
-            {% endif %}
 
             <li>
                 <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
@@ -213,39 +213,39 @@
                             <img id="modalAlumniImg" src="" class="rounded-circle border border-3 border-primary shadow-lg" width="100" height="100" style="object-fit: cover; border-color: var(--a1) !important;">
                             <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-dark" style="width:18px; height:18px;"></div>
                         </div>
-                        <h4 class="modal-title text-white mb-1" id="modalAlumniName"></h4>
+                        <h4 class="modal-title text-hi mb-1" id="modalAlumniName"></h4>
                         <p class="text-muted small mb-0" id="modalAlumniEmail"></p>
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-6">
-                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="p-3 rounded-3" style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Batch</small>
-                                <span class="text-white fw-bold" id="modalAlumniBatch"></span>
+                                <span class="text-hi fw-bold" id="modalAlumniBatch"></span>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="p-3 rounded-3" style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Department</small>
-                                <span class="text-white fw-bold" id="modalAlumniDept"></span>
+                                <span class="text-hi fw-bold" id="modalAlumniDept"></span>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="p-3 rounded-3" style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Degree</small>
-                                <span class="text-white fw-bold" id="modalAlumniDegree"></span>
+                                <span class="text-hi fw-bold" id="modalAlumniDegree"></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label class="text-muted small fw-bold text-uppercase mb-2 d-block" style="letter-spacing: 0.05em;">Career Path</label>
-                        <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.1);">
+                        <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: var(--c-surface-2); border: 1px solid var(--c-border-hi);">
                             <div class="bg-primary-custom rounded-3 p-2 d-flex align-items-center justify-content-center" style="width:40px; height:40px; flex-shrink:0;">
-                                <i class="fas fa-briefcase text-white"></i>
+                                <i class="fas fa-briefcase text-hi"></i>
                             </div>
                             <div>
-                                <h6 class="text-white mb-0" id="modalAlumniPos"></h6>
+                                <h6 class="text-hi mb-0" id="modalAlumniPos"></h6>
                                 <p class="text-muted small mb-0" id="modalAlumniCompany"></p>
                             </div>
                         </div>
@@ -271,7 +271,7 @@
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom d-flex justify-content-between align-items-center">
                     <div>
-                        <h4 class="modal-title text-white mb-1" id="modalJobTitle"></h4>
+                        <h4 class="modal-title text-hi mb-1" id="modalJobTitle"></h4>
                         <p class="mb-0" id="modalJobCompany" style="color: var(--a1); font-weight: 600;"></p>
                     </div>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -290,13 +290,17 @@
                             <i class="fas fa-calendar-alt"></i>
                             <span id="modalJobDate"></span>
                         </div>
+                        <div class="job-modal-meta-item text-danger">
+                            <i class="fas fa-hourglass-end"></i>
+                            <span id="modalJobDeadline"></span>
+                        </div>
                         <div class="job-modal-meta-item">
                             <i class="fas fa-user"></i>
                             <span id="modalJobPostedBy"></span>
                         </div>
                     </div>
                     
-                    <h6 class="text-white mb-3" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--t-muted) !important;">Job Description</h6>
+                    <h6 class="text-hi mb-3" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--t-muted) !important;">Job Description</h6>
                     <div class="job-modal-description" id="modalJobDescription" style="max-height: 400px; overflow-y: auto;"></div>
                 </div>
                 <div class="modal-footer modal-footer-custom">
@@ -323,12 +327,14 @@
         const date = el.getAttribute('data-date');
         const postedBy = el.getAttribute('data-posted-by');
         const applyLink = el.getAttribute('data-apply-link');
+        const deadline = el.getAttribute('data-deadline');
 
         document.getElementById('modalJobTitle').innerText = title;
         document.getElementById('modalJobCompany').innerText = company;
         document.getElementById('modalJobLocation').innerText = location;
         document.getElementById('modalJobType').innerText = type;
         document.getElementById('modalJobDate').innerText = 'Posted on ' + date;
+        document.getElementById('modalJobDeadline').innerText = deadline ? 'Deadline: ' + deadline : 'No Deadline';
         document.getElementById('modalJobPostedBy').innerText = 'by ' + postedBy;
         document.getElementById('modalJobDescription').innerText = description;
         document.getElementById('modalApplyBtn').href = applyLink;

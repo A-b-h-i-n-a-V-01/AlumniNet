@@ -10,7 +10,7 @@
 
     <div class="dash-card">
         <div class="table-responsive">
-            <table class="table table-hover text-white align-middle" style="border-color: rgba(255,255,255,0.05);">
+            <table class="table table-hover text-hi align-middle" style="border-color: var(--c-border-hi);">
                 <thead>
                     <tr class="text-muted small" style="text-transform: uppercase; letter-spacing: 1px;">
                         <th>Job Info</th>
@@ -23,7 +23,7 @@
                 <tbody>
                     {% for job in jobs %}
                     <tr class="job-card-clickable" 
-                        style="cursor: pointer; transition: background 0.3s ease; border-bottom: 1px solid rgba(255,255,255,0.03);"
+                        style="cursor: pointer; transition: background 0.3s ease; border-bottom: 1px solid var(--c-border);"
                         data-title="{{ job.title }}"
                         data-company="{{ job.company }}"
                         data-location="{{ job.location }}"
@@ -34,13 +34,13 @@
                         data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                         onclick="viewJobDetails(this)">
                         <td>
-                            <div class="fw-bold text-white fs-6">{{ job.title }}</div>
+                            <div class="fw-bold text-hi fs-6">{{ job.title }}</div>
                             <div class="text-muted smaller"><i class="fas fa-building me-1"></i> {{ job.company }} &middot; {{ job.location }}</div>
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
                                 <img src="https://ui-avatars.com/api/?name={{ job.author.user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-2" width="28" height="28">
-                                <span class="small text-white">{{ job.author.user.username }}</span>
+                                <span class="small text-hi">{{ job.author.user.username }}</span>
                             </div>
                         </td>
                         <td class="text-muted small">
@@ -73,3 +73,4 @@
     </div>
 </div>
 {% endblock %}
+

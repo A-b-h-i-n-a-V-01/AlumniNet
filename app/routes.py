@@ -7,6 +7,21 @@ from datetime import datetime, timedelta
 from app.models import User, Job, AlumniProfile, StudentProfile, Certificate, FacultyProfile, Message, PointTransaction, EventPhoto
 from app.forms import RegistrationForm, LoginForm, JobPostForm, AlumniProfileForm, StudentProfileForm, FacultyProfileForm, EventPhotoForm, JobPosterForm
 
+from functools import wraps
+
+def approved_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated:
+            if current_user.role == 'alumni':
+                if not current_user.alumni_profile or current_user.alumni_profile.is_approved != 'Approved':
+                    abort(403)
+            elif current_user.role == 'faculty':
+                if not current_user.faculty_profile or not current_user.faculty_profile.is_approved:
+                    abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
@@ -40,7 +55,17 @@ def before_request():
         # Daily Activity points
         if current_user.role == 'alumni':
             award_points(current_user, 'daily_login', 5)
-        db.session.commit()
+        
+        # PROACTIVE LOGIC: Auto-cleanup of expired/orphaned job postings
+        # (This keeps the DB clean for production)
+        now = datetime.utcnow()
+        expired_jobs = Job.query.filter(Job.application_deadline < now).all()
+        if expired_jobs:
+            for job in expired_jobs:
+                db.session.delete(job)
+            db.session.commit()
+            
+    db.session.commit()
 
 def award_points(user, action, amount, unique=False):
     """
@@ -105,13 +130,17 @@ def get_common_stats():
     daily_jobs = Job.query.filter(Job.is_approved == True, 
                                   Job.date_posted >= datetime.utcnow() - timedelta(hours=24)).count()
 
+    # Total jobs
+    total_jobs = Job.query.filter_by(is_approved=True).count()
+
     return {
         'total_alumni': total_alumni,
         'jobs_per_month': jobs_per_month,
         'mentors': mentors,
         'chapters': chapters,
         'active_alumni': active_alumni,
-        'daily_jobs': daily_jobs
+        'daily_jobs': daily_jobs,
+        'total_jobs': total_jobs
     }
 
 # Public Routes
@@ -137,13 +166,27 @@ def register():
         db.session.flush() 
 
         if user.role == 'alumni':
-            profile = AlumniProfile(user_id=user.id, graduation_year=2020, degree='B.Tech')
+            profile = AlumniProfile(
+                user_id=user.id, 
+                graduation_year=form.graduation_year.data or 2020, 
+                degree=form.degree.data or 'B.Tech',
+                department=form.department.data or 'General'
+            )
             db.session.add(profile)
         elif user.role == 'student':
-            profile = StudentProfile(user_id=user.id, enrollment_year=2024, department='CSE')
+            profile = StudentProfile(
+                user_id=user.id, 
+                enrollment_year=form.enrollment_year.data or 2024, 
+                current_year_str=form.current_year.data or '1st Year',
+                department=form.department.data or 'CSE'
+            )
             db.session.add(profile)
         elif user.role == 'faculty':
-            profile = FacultyProfile(user_id=user.id)
+            profile = FacultyProfile(
+                user_id=user.id, 
+                department=form.department.data or 'General',
+                faculty_id=form.faculty_id.data
+            )
             db.session.add(profile)
         
         db.session.commit()
@@ -343,7 +386,11 @@ def dashboard():
             flash('Your alumni profile is missing. Please contact an admin or complete your registration.', 'danger')
             return render_template('dashboard.html', jobs=[], profile=None, event_photos=event_photos, job_posters=job_posters)
         
-        my_jobs = Job.query.filter_by(user_id=current_user.alumni_profile.id).all()
+        now = datetime.utcnow()
+        my_jobs = Job.query.filter(
+            Job.user_id == current_user.alumni_profile.id,
+            db.or_(Job.application_deadline == None, Job.application_deadline >= now)
+        ).all()
         return render_template('dashboard.html', 
                                jobs=my_jobs, 
                                profile=current_user.alumni_profile, 
@@ -355,10 +402,7 @@ def dashboard():
             flash('Your student profile is missing. Please contact an admin.', 'danger')
             return render_template('dashboard.html', jobs=[], event_photos=event_photos, job_posters=job_posters)
             
-        current_year = datetime.utcnow().year
-        student_yr_num = current_year - current_user.student_profile.enrollment_year + 1
-        year_map = {1: "1st Year", 2: "2nd Year", 3: "3rd Year", 4: "4th Year"}
-        student_yr_str = year_map.get(student_yr_num, "4th Year" if student_yr_num > 4 else "1st Year")
+        student_yr_str = current_user.student_profile.current_year_str or "1st Year"
         
         now = datetime.utcnow()
         recent_jobs = Job.query.filter(
@@ -375,16 +419,11 @@ def dashboard():
 
 
 @login_required
+@approved_required
 def jobs():
     now = datetime.utcnow()
     if current_user.role == 'student':
-        current_year = datetime.utcnow().year
-        student_yr_num = current_year - current_user.student_profile.enrollment_year + 1
-        if student_yr_num == 1: student_yr_str = "1st Year"
-        elif student_yr_num == 2: student_yr_str = "2nd Year"
-        elif student_yr_num == 3: student_yr_str = "3rd Year"
-        elif student_yr_num >= 4: student_yr_str = "4th Year"
-        else: student_yr_str = "1st Year"
+        student_yr_str = current_user.student_profile.current_year_str or "1st Year"
         
         jobs = Job.query.filter(
             Job.is_approved == True,
@@ -400,27 +439,28 @@ def jobs():
     return render_template('jobs.html', jobs=jobs)
 
 @login_required
+@approved_required
 def new_job():
     if current_user.role != 'alumni':
         abort(403)
     form = JobPostForm()
     if form.validate_on_submit():
-        deadline = None
-        if form.application_deadline.data:
-            try:
-                deadline = datetime.strptime(form.application_deadline.data, '%Y-%m-%d')
-            except (ValueError, TypeError):
-                pass
-
-        job = Job(title=form.title.data, company=form.company.data, 
-                  location=form.location.data, job_type=form.job_type.data, 
-                  description=form.description.data, target_year=form.target_year.data,
-                  apply_link=form.apply_link.data, application_deadline=deadline,
-                  author=current_user.alumni_profile)
+        job = Job(
+            title=form.title.data,
+            company=form.company.data,
+            location=form.location.data,
+            job_type=form.job_type.data,
+            description=form.description.data,
+            apply_link=form.apply_link.data,
+            target_year=form.target_year.data,
+            application_deadline=form.application_deadline.data,
+            user_id=current_user.alumni_profile.id,
+            is_approved=False # Newly posted jobs need verification
+        )
         db.session.add(job)
         db.session.commit()
-        flash('Job posted! Waiting for faculty approval.', 'success')
-        return redirect(url_for('dashboard'))
+        flash('Thank you! Your job posting has been submitted for verification.', 'info')
+        return redirect(url_for('jobs'))
     return render_template('create_job.html', title='New Job', form=form)
 
 @login_required
@@ -474,7 +514,11 @@ def faculty_moderation():
         flash('Unauthorized: Your faculty profile is pending approval.', 'danger')
         return redirect(url_for('dashboard'))
         
-    pending_jobs = Job.query.filter_by(is_approved=False).all()
+    now = datetime.utcnow()
+    pending_jobs = Job.query.filter(
+        Job.is_approved == False,
+        db.or_(Job.application_deadline == None, Job.application_deadline >= now)
+    ).all()
     pending_alumni = AlumniProfile.query.filter_by(is_approved='Pending').all()
     pending_photos = EventPhoto.query.filter_by(status='pending').all()
     
@@ -563,39 +607,57 @@ def profile():
         if form.validate_on_submit():
             if form.picture.data:
                 current_user.image_file = save_picture(form.picture.data)
+            current_user.faculty_profile.faculty_id = form.faculty_id.data
             current_user.faculty_profile.department = form.department.data
             db.session.commit()
             flash('Profile Updated!', 'success')
             return redirect(url_for('profile'))
         elif request.method == 'GET':
+            form.faculty_id.data = current_user.faculty_profile.faculty_id
             form.department.data = current_user.faculty_profile.department
 
     # Fetch jobs for alumni to display on profile
     my_jobs = []
     if current_user.role == 'alumni' and current_user.alumni_profile:
-        my_jobs = Job.query.filter_by(user_id=current_user.alumni_profile.id).all()
+        now = datetime.utcnow()
+        my_jobs = Job.query.filter(
+            Job.user_id == current_user.alumni_profile.id,
+            db.or_(Job.application_deadline == None, Job.application_deadline >= now)
+        ).all()
 
     return render_template('profile.html', title='Profile', form=form, jobs=my_jobs)
 
 @login_required
+@approved_required
 def view_profile(user_id):
+    if user_id != current_user.id:
+        # Check if user is approved (already handled by decorator for alumni/faculty)
+        pass
     user = User.query.get_or_404(user_id)
     jobs = []
     if user.role == 'alumni' and user.alumni_profile:
         # Show all jobs if the user is looking at their own profile via this route,
         # otherwise only show approved jobs.
+        now = datetime.utcnow()
+        base_query = Job.query.filter(
+            Job.user_id == user.alumni_profile.id,
+            db.or_(Job.application_deadline == None, Job.application_deadline >= now)
+        )
         if current_user.id == user.id:
-            jobs = Job.query.filter_by(user_id=user.alumni_profile.id).order_by(Job.date_posted.desc()).all()
+            jobs = base_query.order_by(Job.date_posted.desc()).all()
         else:
-            jobs = Job.query.filter_by(user_id=user.alumni_profile.id, is_approved=True).order_by(Job.date_posted.desc()).all()
+            jobs = base_query.filter_by(is_approved=True).order_by(Job.date_posted.desc()).all()
     return render_template('view_profile.html', title=f"{user.username}'s Profile", user=user, jobs=jobs)
 
+@login_required
+@approved_required
 def leaderboard():
     # Only show Alumni in the leaderboard
     users = User.query.filter_by(role='alumni').order_by(User.points.desc()).limit(10).all()
     return render_template('leaderboard.html', users=users)
 
 @login_required
+@approved_required
 def search():
     query = request.args.get('q', '').strip()
     
@@ -634,6 +696,7 @@ def search():
     return render_template('search.html', title='Directory', results=results, query=query)
 
 @login_required
+@approved_required
 def messages():
     # Subquery to get the latest message timestamp for each conversation
     # We define a "conversation" by the user we are talking to.
@@ -648,10 +711,14 @@ def messages():
     for cid in contact_ids:
         contact = User.query.get(cid)
         # Get all valid messages for this conversation to find the latest one that isn't functionally deleted for the current user
+        # We also filter out messages that were deleted for everyone (unsent)
         valid_msgs = Message.query.filter(
-            db.or_(
-                db.and_(Message.sender_id == current_user.id, Message.recipient_id == cid, Message.deleted_for_sender == False),
-                db.and_(Message.sender_id == cid, Message.recipient_id == current_user.id, Message.deleted_for_recipient == False)
+            db.and_(
+                Message.is_deleted_everyone == False,
+                db.or_(
+                    db.and_(Message.sender_id == current_user.id, Message.recipient_id == cid, Message.deleted_for_sender == False),
+                    db.and_(Message.sender_id == cid, Message.recipient_id == current_user.id, Message.deleted_for_recipient == False)
+                )
             )
         ).order_by(Message.timestamp.desc()).all()
         
@@ -674,6 +741,7 @@ def messages():
     return render_template('messages.html', title='Messages', contacts_data=contacts_data)
 
 @login_required
+@approved_required
 def chat(user_id):
     if user_id == current_user.id:
         return redirect(url_for('messages'))
@@ -681,9 +749,16 @@ def chat(user_id):
     return render_template('chat.html', title=f'Chat with {other_user.username}', other_user=other_user)
 
 @login_required
+@approved_required
 def api_get_chat(user_id):
     # Mark messages as read when they are fetched
-    unread_msgs = Message.query.filter_by(sender_id=user_id, recipient_id=current_user.id, is_read=False).all()
+    # We only mark messages as read if they haven't been deleted for everyone (unsent)
+    unread_msgs = Message.query.filter_by(
+        sender_id=user_id, 
+        recipient_id=current_user.id, 
+        is_read=False,
+        is_deleted_everyone=False
+    ).all()
     for m in unread_msgs:
         m.is_read = True
     db.session.commit()
@@ -715,6 +790,7 @@ def api_get_chat(user_id):
     return jsonify(valid_msgs)
 
 @login_required
+@approved_required
 def api_send_message(user_id):
     content = request.form.get('content', '').strip()
     if content:
@@ -725,6 +801,7 @@ def api_send_message(user_id):
     return jsonify({'status': 'error', 'message': 'Empty content'}), 400
 
 @login_required
+@approved_required
 def api_delete_message(msg_id):
     msg = Message.query.get_or_404(msg_id)
     if current_user.id not in [msg.sender_id, msg.recipient_id]:
@@ -735,6 +812,7 @@ def api_delete_message(msg_id):
     if delete_type == 'everyone':
         if current_user.id == msg.sender_id:
             msg.is_deleted_everyone = True
+            msg.content = "🚫 This message was unsent"
         else:
             return jsonify({'status': 'error', 'message': 'Only sender can delete for everyone'}), 403
     elif delete_type == 'me':
@@ -747,6 +825,7 @@ def api_delete_message(msg_id):
     return jsonify({'status': 'success'})
 
 @login_required
+@approved_required
 def api_delete_chat(user_id):
     # Retrieve all messages in the conversation between the two users
     msgs = Message.query.filter(
@@ -766,6 +845,7 @@ def api_delete_chat(user_id):
     return jsonify({'status': 'success'})
 
 @login_required
+@approved_required
 def upload_event_photo():
     # Role check: Only Alumni, Faculty, and Admin can upload to galleries
     if current_user.role not in ['alumni', 'faculty', 'admin']:
@@ -790,6 +870,11 @@ def upload_event_photo():
         form.category.data = 'job_poster'
 
     if form.validate_on_submit():
+        # Role check: Only APPROVED Alumni, Faculty, and Admin can upload to galleries
+        if current_user.role == 'alumni' and (not current_user.alumni_profile or current_user.alumni_profile.is_approved != 'Approved'):
+            flash('Unauthorized: Only verified alumni can contribute to the community gallery.', 'danger')
+            return redirect(url_for('dashboard'))
+
         if form.photo.data:
             photo_file = save_event_photo(form.photo.data)
             status = 'pending'
@@ -800,9 +885,6 @@ def upload_event_photo():
                 status = 'approved'
                 verified_by = current_user.id
             
-            # Alumni uploads are always pending for verification
-            # (Previously alumni were auto-approved, now they need verification based on user request)
-                
             if isinstance(form, JobPosterForm):
                 event_name = form.title.data
                 caption = form.description.data
@@ -825,9 +907,9 @@ def upload_event_photo():
             db.session.commit()
             
             if status == 'approved':
-                flash('Photo uploaded and published to gallery!', 'success')
+                flash('Content uploaded and published successfully!', 'success')
             else:
-                flash('Photo submitted for verification. It will appear once approved by faculty.', 'success')
+                flash('Thank you! Your content has been submitted for faculty verification.', 'info')
             return redirect(url_for('dashboard'))
             
     page_title = 'Upload Job Poster' if category_val == 'job_poster' else 'Upload Community Event'
@@ -876,6 +958,7 @@ def reject_photo(photo_id):
     return redirect(url_for('faculty_moderation'))
 
 @login_required
+@approved_required
 def delete_event_photo(photo_id):
     photo = EventPhoto.query.get_or_404(photo_id)
     

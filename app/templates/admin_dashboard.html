@@ -82,7 +82,7 @@
                                     <div class="d-flex align-items-center">
                                         <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4c1d95&color=c4b5fd" class="rounded-circle me-3" width="32" height="32">
                                         <div>
-                                            <div class="fw-bold text-white">{{ user.username }}</div>
+                                            <div class="fw-bold text-hi">{{ user.username }}</div>
                                             <div class="text-muted smaller">{{ user.email }}</div>
                                         </div>
                                     </div>
@@ -121,7 +121,7 @@
                 <div class="mb-3">
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-muted">Messages Sent</span>
-                        <span class="text-white">{{ messages_count }}</span>
+                        <span class="text-hi">{{ messages_count }}</span>
                     </div>
                     <div class="progress" style="height: 4px !important;">
                         <div class="progress-bar bg-info" style="width: 70%"></div>
@@ -130,7 +130,7 @@
                 <div class="mb-0">
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-muted">Job Approval Rate</span>
-                        <span class="text-white">85%</span>
+                        <span class="text-hi">85%</span>
                     </div>
                     <div class="progress" style="height: 4px !important;">
                         <div class="progress-bar bg-success" style="width: 85%"></div>
@@ -141,3 +141,4 @@
     </div>
 </div>
 {% endblock %}
+

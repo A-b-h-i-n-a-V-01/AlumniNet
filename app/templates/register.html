@@ -54,7 +54,8 @@
                     {{ form.username.label(class="form-label") }}
                     {% if form.username.errors %}
                     {{ form.username(class="form-control is-invalid", placeholder="Enter you full name") }}
-                    <div class="invalid-feedback">{% for e in form.username.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                    <div class="invalid-feedback">{% for e in form.username.errors %}<span>{{ e }}</span>{% endfor %}
+                    </div>
                     {% else %}
                     {{ form.username(class="form-control", placeholder="Enter you full name") }}
                     {% endif %}
@@ -68,7 +69,8 @@
                     {% else %}
                     {{ form.email(class="form-control", id="reg_email", placeholder="") }}
                     {% endif %}
-                    <div id="email-hint" class="mt-2 d-none" style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">
+                    <div id="email-hint" class="mt-2 d-none"
+                        style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">
                         <i class="fas fa-info-circle me-1"></i>Emails must be of the form: sngxxxxxxx@sngce.ac.in
                     </div>
                 </div>
@@ -84,10 +86,54 @@
                 </div>
 
                 <div class="mb-3">
+                    {{ form.department.label(class="form-label") }}
+                    {{ form.department(class="form-select") }}
+                </div>
+
+                {# Alumni Specific Fields #}
+                <div id="alumni_fields" class="role-fields d-none">
+                    <div class="mb-3">
+                        {{ form.graduation_year.label(class="form-label") }}
+                        {{ form.graduation_year(class="form-control", placeholder="e.g. 2020") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.degree.label(class="form-label") }}
+                        {{ form.degree(class="form-control", placeholder="e.g. B.Tech CS") }}
+                    </div>
+                </div>
+
+                {# Student Specific Fields #}
+                <div id="student_fields" class="role-fields d-none">
+                    <div class="mb-3">
+                        {{ form.enrollment_year.label(class="form-label") }}
+                        {{ form.enrollment_year(class="form-control", placeholder="e.g. 2024") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.current_year.label(class="form-label") }}
+                        {{ form.current_year(class="form-select") }}
+                    </div>
+                </div>
+
+                {# Faculty Specific Fields #}
+                <div id="faculty_fields" class="role-fields d-none">
+                    <div class="mb-3">
+                        {{ form.faculty_id.label(class="form-label") }}
+                        {% if form.faculty_id.errors %}
+                        {{ form.faculty_id(class="form-control is-invalid", placeholder="") }}
+                        <div class="invalid-feedback">{% for e in form.faculty_id.errors %}<span>{{ e }}</span>{% endfor
+                            %}</div>
+                        {% else %}
+                        {{ form.faculty_id(class="form-control", placeholder="") }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
                     {{ form.password.label(class="form-label") }}
                     {% if form.password.errors %}
                     {{ form.password(class="form-control is-invalid", placeholder="••••••••") }}
-                    <div class="invalid-feedback">{% for e in form.password.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                    <div class="invalid-feedback">{% for e in form.password.errors %}<span>{{ e }}</span>{% endfor %}
+                    </div>
                     {% else %}
                     {{ form.password(class="form-control", placeholder="••••••••") }}
                     {% endif %}
@@ -97,7 +143,8 @@
                     {{ form.confirm_password.label(class="form-label") }}
                     {% if form.confirm_password.errors %}
                     {{ form.confirm_password(class="form-control is-invalid", placeholder="••••••••") }}
-                    <div class="invalid-feedback">{% for e in form.confirm_password.errors %}<span>{{ e }}</span>{% endfor %}</div>
+                    <div class="invalid-feedback">{% for e in form.confirm_password.errors %}<span>{{ e }}</span>{%
+                        endfor %}</div>
                     {% else %}
                     {{ form.confirm_password(class="form-control", placeholder="••••••••") }}
                     {% endif %}
@@ -123,24 +170,33 @@
         const roleField = document.getElementById('reg_role');
         const emailField = document.getElementById('reg_email');
         const emailHint = document.getElementById('email-hint');
+        const alumniFields = document.getElementById('alumni_fields');
+        const studentFields = document.getElementById('student_fields');
+        const facultyFields = document.getElementById('faculty_fields');
 
-        function updateEmailValidation() {
+        function updateRoleFields() {
+            // Hide all specialized sections
+            document.querySelectorAll('.role-fields').forEach(f => f.classList.add('d-none'));
+
             if (roleField.value === 'student') {
                 emailField.setAttribute('pattern', '^[sS][nN][gG][a-zA-Z0-9]+@sngce\\.ac\\.in$');
-                emailField.setAttribute('title', "Student emails must match the institutional format");
-                emailField.placeholder = "";
+                emailField.setAttribute('title', "Student emails must match the institutional format (sngxxxx@sngce.ac.in)");
                 emailHint.classList.remove('d-none');
-            } else {
+                studentFields.classList.remove('d-none');
+            } else if (roleField.value === 'alumni') {
                 emailField.removeAttribute('pattern');
-                emailField.removeAttribute('title');
-                emailField.placeholder = "";
                 emailHint.classList.add('d-none');
+                alumniFields.classList.remove('d-none');
+            } else if (roleField.value === 'faculty') {
+                emailField.removeAttribute('pattern');
+                emailHint.classList.add('d-none');
+                facultyFields.classList.remove('d-none');
             }
         }
 
         if (roleField) {
-            roleField.addEventListener('change', updateEmailValidation);
-            updateEmailValidation(); // Initialize on load
+            roleField.addEventListener('change', updateRoleFields);
+            updateRoleFields(); // Initialize on load
         }
     });
 </script>
