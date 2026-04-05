@@ -1,11 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel — AlumniNet</title>
-    <style>html,body{color:var(--t-base);overflow-x:hidden;}</style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            color: var(--t-base);
+            overflow-x: hidden;
+        }
+    </style>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -13,9 +22,11 @@
         :root {
             --admin-sb-w: 260px;
         }
+
         #adminSidebar {
             position: fixed;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
             width: var(--admin-sb-w);
             height: 100vh;
             background: var(--c-surface);
@@ -26,12 +37,14 @@
             display: flex;
             flex-direction: column;
         }
+
         .admin-main {
             margin-left: var(--admin-sb-w);
             padding: 40px;
             min-height: 100vh;
             background: var(--c-bg);
         }
+
         .admin-nav-link {
             display: flex;
             align-items: center;
@@ -44,24 +57,29 @@
             margin-bottom: 4px;
             transition: all 0.3s ease;
         }
+
         .admin-nav-link:hover {
             background: var(--c-border-hi);
             color: var(--t-hi);
         }
+
         .admin-nav-link.active {
-            background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(124,58,237,0.1));
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.1));
             color: #a78bfa;
             /* No border — avoids double-rectangle with any JS pill */
         }
+
         .admin-nav-link i {
             width: 20px;
             text-align: center;
         }
+
         .admin-brand {
             font-family: 'Syne', sans-serif;
             font-weight: 800;
             font-size: 1.25rem;
-            color: #ef4444; /* Admin identity color */
+            color: #ef4444;
+            /* Admin identity color */
             display: flex;
             align-items: center;
             gap: 10px;
@@ -69,6 +87,7 @@
             padding: 0 10px;
             text-decoration: none;
         }
+
         .admin-stat-card {
             background: var(--c-border);
             border: 1px solid var(--c-border);
@@ -76,36 +95,44 @@
             padding: 24px;
             transition: all 0.3s var(--ease);
         }
+
         .admin-stat-card:hover {
-            border-color: rgba(124,58,237,0.3);
+            border-color: rgba(124, 58, 237, 0.3);
             transform: translateY(-4px);
         }
     </style>
 </head>
+
 <body>
     <div id="adminSidebar">
         <a href="{{ url_for('admin_dashboard') }}" class="admin-brand">
             <i class="fas fa-shield-alt"></i>
             <span>AdminNet</span>
         </a>
-        
+
         <nav class="flex-grow-1">
-            <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            <a href="{{ url_for('admin_dashboard') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
                 <i class="fas fa-th-large"></i> Dashboard
             </a>
-            <a href="{{ url_for('admin_users') }}" class="admin-nav-link {% if request.endpoint == 'admin_users' %}active{% endif %}">
+            <a href="{{ url_for('admin_users') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_users' %}active{% endif %}">
                 <i class="fas fa-users"></i> Manage Users
             </a>
-            <a href="{{ url_for('admin_faculty_approvals') }}" class="admin-nav-link {% if request.endpoint == 'admin_faculty_approvals' %}active{% endif %}">
-                <i class="fas fa-user-check"></i> Faculty Approvals
+            <a href="{{ url_for('admin_faculty_approvals') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_faculty_approvals' %}active{% endif %}">
+                <i class="fas fa-user-check"></i> Approvals
             </a>
-            <a href="{{ url_for('admin_jobs') }}" class="admin-nav-link {% if request.endpoint == 'admin_jobs' %}active{% endif %}">
+            <a href="{{ url_for('admin_jobs') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_jobs' %}active{% endif %}">
                 <i class="fas fa-briefcase"></i> Job Moderation
             </a>
-            <a href="{{ url_for('admin_points') }}" class="admin-nav-link {% if request.endpoint == 'admin_points' %}active{% endif %}">
+            <a href="{{ url_for('admin_points') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_points' %}active{% endif %}">
                 <i class="fas fa-bolt"></i> Points Control
             </a>
-            <a href="{{ url_for('admin_stats') }}" class="admin-nav-link {% if request.endpoint == 'admin_stats' %}active{% endif %}">
+            <a href="{{ url_for('admin_stats') }}"
+                class="admin-nav-link {% if request.endpoint == 'admin_stats' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i> Analytics
             </a>
         </nav>
@@ -124,12 +151,13 @@
         <div class="container-fluid">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert" style="background: var(--c-surface-2); color: var(--t-hi);">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endfor %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert"
+                style="background: var(--c-surface-2); color: var(--t-hi);">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
             {% endif %}
             {% endwith %}
 
@@ -147,7 +175,8 @@
                         <h4 class="modal-title text-hi mb-1" id="modalJobTitle"></h4>
                         <p class="mb-0" id="modalJobCompany" style="color: var(--a1); font-weight: 600;"></p>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body modal-body-custom">
                     <div class="job-modal-meta">
@@ -168,12 +197,16 @@
                             <span id="modalJobPostedBy"></span>
                         </div>
                     </div>
-                    
-                    <h6 class="text-hi mb-3" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--t-muted) !important;">Job Description</h6>
-                    <div class="job-modal-description" id="modalJobDescription" style="max-height: 400px; overflow-y: auto;"></div>
+
+                    <h6 class="text-hi mb-3"
+                        style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--t-muted) !important;">
+                        Job Description</h6>
+                    <div class="job-modal-description" id="modalJobDescription"
+                        style="max-height: 400px; overflow-y: auto;"></div>
                 </div>
                 <div class="modal-footer modal-footer-custom">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4"
+                        data-bs-dismiss="modal">Close</button>
                     <a href="#" id="modalApplyBtn" target="_blank" class="btn btn-primary-custom btn-sm px-5">
                         Apply Link <i class="fas fa-external-link-alt ms-2"></i>
                     </a>
@@ -187,13 +220,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom border-0 pb-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body modal-body-custom pt-0">
                     <div class="text-center mb-4">
                         <div class="position-relative d-inline-block mb-3">
-                            <img id="modalAlumniImg" src="" class="rounded-circle border border-3 border-primary shadow-lg" width="100" height="100" style="object-fit: cover; border-color: var(--a1) !important;">
-                            <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-dark" style="width:18px; height:18px;"></div>
+                            <img id="modalAlumniImg" src=""
+                                class="rounded-circle border border-3 border-primary shadow-lg" width="100" height="100"
+                                style="object-fit: cover; border-color: var(--a1) !important;">
+                            <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-dark"
+                                style="width:18px; height:18px;"></div>
                         </div>
                         <h4 class="modal-title text-hi mb-1" id="modalAlumniName"></h4>
                         <p class="text-muted small mb-0" id="modalAlumniEmail"></p>
@@ -201,19 +238,22 @@
 
                     <div class="row g-3 mb-4">
                         <div class="col-6">
-                            <div class="p-3 rounded-3" style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
+                            <div class="p-3 rounded-3"
+                                style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Batch</small>
                                 <span class="text-hi fw-bold" id="modalAlumniBatch"></span>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 rounded-3" style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
+                            <div class="p-3 rounded-3"
+                                style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Department</small>
                                 <span class="text-hi fw-bold" id="modalAlumniDept"></span>
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="p-3 rounded-3" style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
+                            <div class="p-3 rounded-3"
+                                style="background: var(--c-border); border: 1px solid var(--c-border-hi);">
                                 <small class="text-muted d-block mb-1">Degree</small>
                                 <span class="text-hi fw-bold" id="modalAlumniDegree"></span>
                             </div>
@@ -221,9 +261,12 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="text-muted small fw-bold text-uppercase mb-2 d-block" style="letter-spacing: 0.05em;">Career Path</label>
-                        <div class="d-flex align-items-start gap-3 p-3 rounded-3" style="background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.1);">
-                            <div class="bg-primary-custom rounded-3 p-2 d-flex align-items-center justify-content-center" style="width:40px; height:40px; flex-shrink:0;">
+                        <label class="text-muted small fw-bold text-uppercase mb-2 d-block"
+                            style="letter-spacing: 0.05em;">Career Path</label>
+                        <div class="d-flex align-items-start gap-3 p-3 rounded-3"
+                            style="background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.1);">
+                            <div class="bg-primary-custom rounded-3 p-2 d-flex align-items-center justify-content-center"
+                                style="width:40px; height:40px; flex-shrink:0;">
                                 <i class="fas fa-briefcase text-hi"></i>
                             </div>
                             <div>
@@ -234,13 +277,16 @@
                     </div>
 
                     <div id="modalAlumniLinkedInContainer">
-                        <a href="#" id="modalAlumniLinkedIn" target="_blank" class="btn btn-outline-primary btn-sm w-100 py-2 rounded-3 d-flex align-items-center justify-content-center gap-2" style="border-color: #0077b5; color: #0077b5;">
+                        <a href="#" id="modalAlumniLinkedIn" target="_blank"
+                            class="btn btn-outline-primary btn-sm w-100 py-2 rounded-3 d-flex align-items-center justify-content-center gap-2"
+                            style="border-color: #0077b5; color: #0077b5;">
                             <i class="fab fa-linkedin"></i> Professional Profile
                         </a>
                     </div>
                 </div>
                 <div class="modal-footer modal-footer-custom border-0 pt-0 pb-4 justify-content-center">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 rounded-pill" data-bs-dismiss="modal">Close Preview</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 rounded-pill"
+                        data-bs-dismiss="modal">Close Preview</button>
                 </div>
             </div>
         </div>
@@ -249,71 +295,71 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-    let globalJobModal, globalAlumniModal;
-    function viewJobDetails(el) {
-        // Prevent default browser behaviors
-        if (window.event) window.event.preventDefault();
-        
-        const title = el.getAttribute('data-title');
-        const company = el.getAttribute('data-company');
-        const location = el.getAttribute('data-location');
-        const type = el.getAttribute('data-type');
-        const description = el.getAttribute('data-description');
-        const date = el.getAttribute('data-date');
-        const postedBy = el.getAttribute('data-posted-by');
-        const applyLink = el.getAttribute('data-apply-link');
+        let globalJobModal, globalAlumniModal;
+        function viewJobDetails(el) {
+            // Prevent default browser behaviors
+            if (window.event) window.event.preventDefault();
 
-        document.getElementById('modalJobTitle').innerText = title;
-        document.getElementById('modalJobCompany').innerText = company;
-        document.getElementById('modalJobLocation').innerText = location;
-        document.getElementById('modalJobType').innerText = type;
-        document.getElementById('modalJobDate').innerText = 'Posted on ' + date;
-        document.getElementById('modalJobPostedBy').innerText = 'by ' + postedBy;
-        document.getElementById('modalJobDescription').innerText = description;
-        document.getElementById('modalApplyBtn').href = applyLink;
+            const title = el.getAttribute('data-title');
+            const company = el.getAttribute('data-company');
+            const location = el.getAttribute('data-location');
+            const type = el.getAttribute('data-type');
+            const description = el.getAttribute('data-description');
+            const date = el.getAttribute('data-date');
+            const postedBy = el.getAttribute('data-posted-by');
+            const applyLink = el.getAttribute('data-apply-link');
 
-        if (!globalJobModal) {
-            globalJobModal = new bootstrap.Modal(document.getElementById('jobDetailModal'));
-        }
-        globalJobModal.show();
-    }
+            document.getElementById('modalJobTitle').innerText = title;
+            document.getElementById('modalJobCompany').innerText = company;
+            document.getElementById('modalJobLocation').innerText = location;
+            document.getElementById('modalJobType').innerText = type;
+            document.getElementById('modalJobDate').innerText = 'Posted on ' + date;
+            document.getElementById('modalJobPostedBy').innerText = 'by ' + postedBy;
+            document.getElementById('modalJobDescription').innerText = description;
+            document.getElementById('modalApplyBtn').href = applyLink;
 
-    function viewAlumniDetails(el) {
-        if (window.event) window.event.preventDefault();
-
-        const name = el.getAttribute('data-name');
-        const email = el.getAttribute('data-email');
-        const batch = el.getAttribute('data-batch');
-        const dept = el.getAttribute('data-dept');
-        const degree = el.getAttribute('data-degree');
-        const position = el.getAttribute('data-position');
-        const company = el.getAttribute('data-company');
-        const linkedin = el.getAttribute('data-linkedin');
-        const image = el.getAttribute('data-image');
-
-        document.getElementById('modalAlumniName').innerText = name;
-        document.getElementById('modalAlumniEmail').innerText = email;
-        document.getElementById('modalAlumniBatch').innerText = batch;
-        document.getElementById('modalAlumniDept').innerText = dept;
-        document.getElementById('modalAlumniDegree').innerText = degree;
-        document.getElementById('modalAlumniPos').innerText = position || 'Aspiring Professional';
-        document.getElementById('modalAlumniCompany').innerText = company || 'In Transition';
-        document.getElementById('modalAlumniImg').src = image;
-
-        const linkedinBtn = document.getElementById('modalAlumniLinkedInContainer');
-        if (linkedin && linkedin !== 'None' && linkedin !== '') {
-            linkedinBtn.style.display = 'block';
-            document.getElementById('modalAlumniLinkedIn').href = linkedin;
-        } else {
-            linkedinBtn.style.display = 'none';
+            if (!globalJobModal) {
+                globalJobModal = new bootstrap.Modal(document.getElementById('jobDetailModal'));
+            }
+            globalJobModal.show();
         }
 
-        if (!globalAlumniModal) {
-            globalAlumniModal = new bootstrap.Modal(document.getElementById('alumniDetailModal'));
+        function viewAlumniDetails(el) {
+            if (window.event) window.event.preventDefault();
+
+            const name = el.getAttribute('data-name');
+            const email = el.getAttribute('data-email');
+            const batch = el.getAttribute('data-batch');
+            const dept = el.getAttribute('data-dept');
+            const degree = el.getAttribute('data-degree');
+            const position = el.getAttribute('data-position');
+            const company = el.getAttribute('data-company');
+            const linkedin = el.getAttribute('data-linkedin');
+            const image = el.getAttribute('data-image');
+
+            document.getElementById('modalAlumniName').innerText = name;
+            document.getElementById('modalAlumniEmail').innerText = email;
+            document.getElementById('modalAlumniBatch').innerText = batch;
+            document.getElementById('modalAlumniDept').innerText = dept;
+            document.getElementById('modalAlumniDegree').innerText = degree;
+            document.getElementById('modalAlumniPos').innerText = position || 'Aspiring Professional';
+            document.getElementById('modalAlumniCompany').innerText = company || 'In Transition';
+            document.getElementById('modalAlumniImg').src = image;
+
+            const linkedinBtn = document.getElementById('modalAlumniLinkedInContainer');
+            if (linkedin && linkedin !== 'None' && linkedin !== '') {
+                linkedinBtn.style.display = 'block';
+                document.getElementById('modalAlumniLinkedIn').href = linkedin;
+            } else {
+                linkedinBtn.style.display = 'none';
+            }
+
+            if (!globalAlumniModal) {
+                globalAlumniModal = new bootstrap.Modal(document.getElementById('alumniDetailModal'));
+            }
+            globalAlumniModal.show();
         }
-        globalAlumniModal.show();
-    }
     </script>
 </body>
-</html>
 
+</html>
