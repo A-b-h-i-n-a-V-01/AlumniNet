@@ -133,7 +133,7 @@
                     data-title="{{ job.title }}" data-company="{{ job.company }}" data-location="{{ job.location }}"
                     data-type="{{ job.job_type if job.job_type else 'Full Time' }}"
                     data-description="{{ job.description }}" data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
-                    data-deadline="{{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else '' }}"
+                    data-deadline="{{ job.application_deadline.strftime('%d %b %Y') if job.application_deadline else '' }}"
                     data-posted-by="{{ job.author.user.username }}"
                     data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                     onclick="viewJobDetails(this)">

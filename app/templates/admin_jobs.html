@@ -31,6 +31,7 @@
                         data-description="{{ job.description }}"
                         data-date="{{ job.date_posted.strftime('%d %b %Y') }}"
                         data-posted-by="{{ job.author.user.username }}"
+                        data-deadline="{{ job.application_deadline.strftime('%d %b %Y') if job.application_deadline else '' }}"
                         data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                         onclick="viewJobDetails(this)">
                         <td>

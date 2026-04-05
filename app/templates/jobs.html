@@ -2,28 +2,34 @@
 
 {% block content %}
 <div class="fade-in-up">
-    <div class="d-flex justify-content-between align-items-end mb-5" data-reveal="fade-down">
+    <div class="d-flex justify-content-between align-items-center mb-5" data-reveal="fade-down">
         <div>
             <h2 style="font-family:'Syne', sans-serif; font-weight:800; letter-spacing:-.03em; background:var(--grad-text); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-size:2.5rem; margin-bottom:8px;">Career Opportunities</h2>
             <p style="color:var(--t-muted); font-size:1.05rem;">Exclusive openings from our global alumni network.</p>
         </div>
-    </div>
-
-    <div class="row mb-5 g-3 align-items-center" data-reveal="fade-up">
-        <div class="col-md-8 col-lg-9">
-            <div class="position-relative">
-                <i class="fas fa-search position-absolute top-50 translate-middle-y ms-3 text-muted" style="z-index: 10;"></i>
-                <input type="text" id="jobSearch" class="form-control py-2"
-                    placeholder="Search by role, company, or location..."
-                    style="background:var(--c-surface); border:1px solid var(--c-border); color:var(--t-hi); border-radius:12px; padding-left: 3.2rem !important;">
-            </div>
-        </div>
-        <div class="col-md-4 col-lg-3 text-md-end">
+        <div>
             {% if current_user.role == 'alumni' %}
-            <a href="{{ url_for('new_job') }}" class="btn btn-primary-custom w-100 py-2" style="border-radius:12px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <a href="{{ url_for('new_job') }}" class="btn btn-primary-custom px-4 py-2">
                 <i class="fas fa-plus me-2"></i>Post Opportunity
             </a>
             {% endif %}
+        </div>
+    </div>
+
+    <div class="dash-card bg-surface border-0 p-4 mb-5" data-reveal="fade-up">
+        <div class="d-flex flex-wrap gap-2">
+            <div class="flex-grow-1">
+                <input type="text" id="jobSearch" class="form-control h-100" placeholder="Search by role, company, or location...">
+            </div>
+            <div class="filter-group">
+                <select id="typeFilter" class="form-select h-100 px-4" style="min-width: 140px; cursor: pointer;">
+                    <option value="All">All Types</option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+            <button id="searchBtn" class="btn btn-primary-custom px-4"><i class="fas fa-search me-1"></i> Search</button>
         </div>
     </div>
 
@@ -32,9 +38,9 @@
         <div class="col-md-6 col-lg-4" data-reveal="fade-up">
             <div class="dash-card h-100 d-flex flex-column job-card-clickable" style="padding:24px;"
                 data-title="{{ job.title }}" data-company="{{ job.company }}" data-location="{{ job.location }}"
-                data-type="{{ job.job_type if job.job_type else 'Full Time' }}" data-description="{{ job.description }}"
+                data-type="{{ job.job_type if job.job_type else 'Full-time' }}" data-description="{{ job.description }}"
                 data-date="{{ job.date_posted.strftime('%d %b %Y') }}" data-posted-by="{{ job.author.user.username }}"
-                data-deadline="{{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else '' }}"
+                data-deadline="{{ job.application_deadline.strftime('%d %b %Y') if job.application_deadline else '' }}"
                 data-target-year="{{ job.target_year }}"
                 data-apply-link="{{ 'mailto:' + job.apply_link if '@' in job.apply_link and '://' not in job.apply_link else (job.apply_link if '://' in job.apply_link else 'https://' + job.apply_link) }}"
                 onclick="viewJobDetails(this)">
@@ -85,21 +91,29 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('jobSearch');
+        const typeFilter = document.getElementById('typeFilter');
+        const searchBtn = document.getElementById('searchBtn');
+        const jobCards = document.querySelectorAll('.job-card-clickable');
+
         function filterJobs() {
             const query = searchInput.value.toLowerCase();
+            const selectedType = typeFilter.value;
 
             jobCards.forEach(card => {
                 const title = card.getAttribute('data-title').toLowerCase();
                 const company = card.getAttribute('data-company').toLowerCase();
                 const location = card.getAttribute('data-location').toLowerCase();
                 const date = card.getAttribute('data-date').toLowerCase();
+                const jobType = card.getAttribute('data-type'); // e.g. "Full-time"
 
                 const matchesSearch = title.includes(query) ||
                     company.includes(query) ||
                     location.includes(query) ||
                     date.includes(query);
+                
+                const matchesType = selectedType === 'All' || jobType === selectedType;
 
-                if (matchesSearch) {
+                if (matchesSearch && matchesType) {
                     card.parentElement.style.display = 'block';
                     card.parentElement.classList.add('fade-in');
                 } else {
@@ -109,6 +123,8 @@
         }
 
         searchInput.addEventListener('keyup', filterJobs);
+        typeFilter.addEventListener('change', filterJobs);
+        searchBtn.addEventListener('click', filterJobs);
     });
 </script>
 <style>

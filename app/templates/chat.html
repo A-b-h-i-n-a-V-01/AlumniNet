@@ -269,6 +269,34 @@
     .btn-send:active {
         transform: scale(0.95);
     }
+    /* Message Actions (Dropdown) */
+    .msg-actions {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        display: flex;
+        align-items: center;
+        margin: 0 8px;
+    }
+
+    .msg-inner:hover .msg-actions {
+        opacity: 1;
+    }
+
+    .msg-actions .dropdown-toggle::after {
+        display: none;
+    }
+
+    .msg-actions .btn-link {
+        color: var(--t-muted);
+        padding: 4px;
+        line-height: 1;
+    }
+
+    .msg-actions .btn-link:hover {
+        color: var(--t-hi);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+    }
 </style>
 
 <script>
@@ -297,11 +325,11 @@
             const isMe = msg.sender_id === currentUserId;
 
             const bubbleWrap = document.createElement('div');
-            bubbleWrap.className = `d-flex mb-1 ${isMe ? 'justify-content-end' : 'justify-content-start'}`;
+            bubbleWrap.className = `d-flex mb-1 msg-row ${isMe ? 'justify-content-end' : 'justify-content-start'}`;
 
             // Container for bubble and dropdown
             const msgInner = document.createElement('div');
-            msgInner.className = `position-relative d-flex align-items-center ${isMe ? 'flex-row-reverse' : 'flex-row'}`;
+            msgInner.className = `position-relative d-flex align-items-center msg-inner ${isMe ? 'flex-row-reverse' : 'flex-row'}`;
 
             const contentDiv = document.createElement('div');
             contentDiv.className = `chat-bubble ${isMe ? 'bubble-sent' : 'bubble-received'}`;
@@ -315,55 +343,49 @@
             contentDiv.appendChild(timeDiv);
             msgInner.appendChild(contentDiv);
 
-            // Add dropdown menu for deleting, if not already deleted for everyone
-            if (!msg.is_deleted_everyone) {
-                const dropWrap = document.createElement('div');
-                dropWrap.className = 'dropdown ms-2 me-2 d-flex align-items-center opacity-75';
+            // Add dropdown menu for deleting
+            const dropWrap = document.createElement('div');
+            dropWrap.className = 'dropdown msg-actions';
+            
+            const dropBtn = document.createElement('button');
+            dropBtn.className = 'btn btn-link btn-sm text-muted p-2';
+            dropBtn.style.boxShadow = 'none';
+            dropBtn.style.textDecoration = 'none';
+            dropBtn.setAttribute('data-bs-toggle', 'dropdown');
+            dropBtn.setAttribute('aria-expanded', 'false');
+            dropBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
 
-                const dropBtn = document.createElement('button');
-                dropBtn.className = 'btn btn-link btn-sm text-muted p-2';
-                dropBtn.style.boxShadow = 'none';
-                dropBtn.style.textDecoration = 'none';
-                dropBtn.setAttribute('data-bs-toggle', 'dropdown');
-                dropBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>';
+            const dropMenu = document.createElement('ul');
+            dropMenu.className = `dropdown-menu dropdown-menu-dark shadow border-0 ${isMe ? 'dropdown-menu-end' : ''}`;
+            dropMenu.style.padding = '4px';
+            dropMenu.style.minWidth = '150px';
 
-                const dropMenu = document.createElement('ul');
-                dropMenu.className = 'dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-sm border-0';
-                dropMenu.style.minWidth = '180px';
+            // Delete for me
+            const liMe = document.createElement('li');
+            const aMe = document.createElement('a');
+            aMe.className = 'dropdown-item text-hi d-flex align-items-center py-2 rounded';
+            aMe.href = '#';
+            aMe.innerHTML = '<i class="far fa-trash-alt me-2 text-danger" style="width:20px;text-align:center;"></i> Delete for me';
+            aMe.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'me'); };
+            liMe.appendChild(aMe);
+            dropMenu.appendChild(liMe);
 
-                // Delete for me
-                const liMe = document.createElement('li');
-                const aMe = document.createElement('a');
-                aMe.className = 'dropdown-item text-danger d-flex align-items-center py-2';
-                aMe.href = '#';
-                aMe.innerHTML = '<i class="far fa-trash-alt me-2" style="width:20px;text-align:center;"></i> Delete for me';
-                aMe.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'me'); };
-                liMe.appendChild(aMe);
-                dropMenu.appendChild(liMe);
-
-                // Delete for everyone (only for sender)
-                if (isMe) {
-                    const liEve = document.createElement('li');
-                    const aEve = document.createElement('a');
-                    aEve.className = 'dropdown-item text-danger d-flex align-items-center py-2';
-                    aEve.href = '#';
-                    aEve.innerHTML = '<i class="fas fa-undo me-2" style="width:20px;text-align:center;"></i> Unsend';
-                    aEve.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'everyone'); };
-                    liEve.appendChild(aEve);
-                    dropMenu.appendChild(liEve);
-                }
-
-                dropWrap.appendChild(dropBtn);
-                dropWrap.appendChild(dropMenu);
-
-                // Prepend dropdown so it appears on the left of bubble for sender, or right for receiver
-                if (isMe) {
-                    msgInner.insertBefore(dropWrap, contentDiv);
-                } else {
-                    msgInner.appendChild(dropWrap);
-                }
+            // Delete for everyone (only for sender)
+            if (isMe) {
+                const liEve = document.createElement('li');
+                const aEve = document.createElement('a');
+                aEve.className = 'dropdown-item text-hi d-flex align-items-center py-2 rounded';
+                aEve.href = '#';
+                aEve.innerHTML = '<i class="fas fa-undo me-2 text-warning" style="width:20px;text-align:center;"></i> Unsend';
+                aEve.onclick = (e) => { e.preventDefault(); deleteMessage(msg.id, 'everyone'); };
+                liEve.appendChild(aEve);
+                dropMenu.appendChild(liEve);
             }
 
+            dropWrap.appendChild(dropBtn);
+            dropWrap.appendChild(dropMenu);
+
+            msgInner.appendChild(dropWrap);
             bubbleWrap.appendChild(msgInner);
             chatMessages.appendChild(bubbleWrap);
         });

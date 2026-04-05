@@ -56,15 +56,13 @@
                     <div class="col-md-6 mb-3">
                         {{ form.application_deadline.label(class="form-label") }}
                         {% if form.application_deadline.errors %}
-                        {{ form.application_deadline(class="form-control is-invalid", placeholder="dd/mm/yyyy") }}
+                        {{ form.application_deadline(class="form-control is-invalid", id="application_deadline", placeholder="Select date...") }}
                         <div class="invalid-feedback">{% for e in form.application_deadline.errors %}<span>{{ e
                                 }}</span>{% endfor %}</div>
                         {% else %}
-                        {{ form.application_deadline(class="form-control", placeholder="dd/mm/yyyy") }}
+                        {{ form.application_deadline(class="form-control", id="application_deadline", placeholder="Select date...") }}
                         {% endif %}
-                        <div class="form-text mt-1 text-muted small">Please enter the date in <span
-                                style="color:var(--primary); font-weight:700;">dd/mm/yyyy</span> format (e.g.,
-                            31/12/2026).</div>
+                        <div class="form-text mt-1 text-muted small">Choose the last date for students to apply.</div>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -83,4 +81,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Flatpickr for the application deadline
+    flatpickr("#application_deadline", {
+        dateFormat: "d/m/Y",
+        minDate: "today",
+        allowInput: true,
+        altInput: false, // We use the direct input to match WTForms expectation
+        disableMobile: "true", // Use custom desktop UI even on mobile for better UX
+        onReady: function(selectedDates, dateStr, instance) {
+            // Apply custom styling to the flatpickr input if needed
+            instance.altInput && instance.altInput.classList.add("form-control");
+        }
+    });
+});
+</script>
 {% endblock %}

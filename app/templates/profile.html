@@ -356,8 +356,7 @@
                             </td>
                             <td style="color:var(--t-base); font-size: 0.85rem;">{{ job.company }}</td>
                             <td style="color:var(--t-muted); font-size: 0.8rem; font-weight: 700; color: var(--a1);">
-                                {{ job.application_deadline.strftime('%d/%m/%Y') if job.application_deadline else 'No
-                                Deadline' }}
+                                {{ job.application_deadline.strftime('%d %b %Y') if job.application_deadline else 'No Deadline' }}
                             </td>
                             <td class="text-end pe-0">
                                 <span class="badge"
