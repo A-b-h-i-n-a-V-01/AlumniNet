@@ -3,6 +3,12 @@
 AlumniNet is a modern, high-performance platform designed to bridge the gap between Alumni, Students, and Faculty. Built with **Flask** and **MySQL**, it provides a seamless environment for networking, mentorship, and career growth through real-time communication and gamified contributions.
 
 ---
+## 📊 Project Objectives
+
+- Improve alumni-student networking
+- Facilitate career opportunities
+- Enable knowledge sharing
+- Strengthen community engagement
 
 ## ✨ Key Features
 
