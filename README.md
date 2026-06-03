@@ -284,6 +284,12 @@ python add_resume_column.py
 > To avoid schema drift in the future, consider adopting **Flask-Migrate** (`flask db migrate / flask db upgrade`) which auto-generates migration scripts whenever your models change.
 
 ---
+## 🚀 Future Enhancements
+
+- Mobile Application Support
+- AI-powered Recommendation System
+- Real-time Notifications
+- Advanced Analytics Dashboard
 
 ## 👨‍💻 Contributing
 Feel free to fork this project and submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
